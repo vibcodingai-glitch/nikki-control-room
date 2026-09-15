@@ -108,6 +108,28 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoTriggerConfig, sceneIndex, timeConfig, updateState]);
 
+  // Automatic Scene Progression (Cinematic Sequence)
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (sceneIndex === 1) {
+      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), 6000);
+    } else if (sceneIndex === 2) {
+      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), 8000);
+    } else if (sceneIndex === 3) {
+      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), 10000);
+    } else if (sceneIndex === 5) {
+      timeout = setTimeout(() => updateState({ sceneIndex: 6 }), 5000);
+    } else if (sceneIndex === 6) {
+      timeout = setTimeout(() => updateState({ sceneIndex: 7 }), 6000);
+    }
+
+    // Cleanup timeout if scene changes manually before timeout fires
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [sceneIndex, updateState]);
+
   if (!isReady) return null;
 
   return (
