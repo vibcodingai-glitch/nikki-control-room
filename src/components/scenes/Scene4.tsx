@@ -176,8 +176,8 @@ export const Scene4: React.FC<SceneProps> = ({ showSubtext = false }) => {
 
         <div className="flex flex-col items-center gap-12 mt-12 w-full">
           <SplitFlap 
-            text="HAPPY BIRTHDAY NIKKI! 🎉" 
-            color="text-[var(--color-brand-coral)]" 
+            text="HAPPY BIRTHDAY NIKKI!" 
+            color="text-[var(--color-brand-green)]" 
             fontSize="text-5xl md:text-7xl lg:text-8xl font-bold" 
             className="justify-center"
             staggerDelayMs={60}
