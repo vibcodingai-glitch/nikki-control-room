@@ -128,13 +128,20 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Header */}
-        <header className="flex items-center justify-between border-b border-gray-800 pb-4">
+        <header className="flex items-center justify-between border-b border-gray-800 pb-4 flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <ShieldAlert className="text-emerald-500" size={28} />
             <h1 className="text-2xl font-bold text-white tracking-widest uppercase">CWAR Master Control</h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+              typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL 
+                ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400' 
+                : 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400'
+            }`}>
+              {typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL ? '☁️ Cloud Sync' : '💻 Local Only'}
+            </div>
             <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border ${isConnected ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' : 'border-red-500/50 bg-red-500/10 text-red-400'}`}>
               <Activity size={16} className={isConnected ? "animate-pulse" : ""} />
               <span className="text-xs font-bold uppercase tracking-wider">
@@ -143,6 +150,26 @@ export default function AdminPage() {
             </div>
           </div>
         </header>
+
+        {/* LAUNCH SEQUENCE - Big prominent button */}
+        {sceneIndex === 0 && (
+          <section className="relative overflow-hidden rounded-xl border-2 border-red-500/30 bg-gradient-to-r from-red-950/40 via-red-900/20 to-red-950/40">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.15),transparent_70%)]" />
+            <div className="relative p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <div className="text-[10px] text-red-400 uppercase tracking-[0.3em] mb-1">One-Tap Launch</div>
+                <div className="text-lg sm:text-xl text-white font-bold">Start the full cinematic experience</div>
+                <div className="text-xs text-gray-500 mt-1">Triggers Scene 1 → auto-advances through all scenes</div>
+              </div>
+              <button
+                onClick={() => handleSceneChange(1)}
+                className="w-full sm:w-auto px-10 py-5 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-black text-xl uppercase tracking-widest rounded-lg shadow-lg shadow-red-600/30 hover:shadow-red-500/50 transition-all duration-200 flex items-center justify-center gap-3 whitespace-nowrap"
+              >
+                <AlertTriangle size={24} /> LAUNCH
+              </button>
+            </div>
+          </section>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
