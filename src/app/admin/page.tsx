@@ -151,15 +151,14 @@ export default function AdminPage() {
           </div>
         </header>
 
-        {/* LAUNCH SEQUENCE - Big prominent button */}
-        {sceneIndex === 0 && (
-          <section className="relative overflow-hidden rounded-xl border-2 border-red-500/30 bg-gradient-to-r from-red-950/40 via-red-900/20 to-red-950/40">
+        {/* LAUNCH SEQUENCE - Big prominent button (always visible) */}
+        <section className="relative overflow-hidden rounded-xl border-2 border-red-500/30 bg-gradient-to-r from-red-950/40 via-red-900/20 to-red-950/40">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.15),transparent_70%)]" />
             <div className="relative p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <div className="text-[10px] text-red-400 uppercase tracking-[0.3em] mb-1">One-Tap Launch</div>
                 <div className="text-lg sm:text-xl text-white font-bold">Start the full cinematic experience</div>
-                <div className="text-xs text-gray-500 mt-1">Triggers Scene 1 → auto-advances through all scenes</div>
+                <div className="text-xs text-gray-500 mt-1">Resets to Scene 1 → auto-advances through all scenes</div>
               </div>
               <button
                 onClick={() => handleSceneChange(1)}
@@ -169,7 +168,6 @@ export default function AdminPage() {
               </button>
             </div>
           </section>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
