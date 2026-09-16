@@ -5,8 +5,11 @@ import { useSyncState } from "@/lib/useSyncState";
 import { Activity, Power, Clock, Settings, AlertTriangle, SkipForward, VolumeX, ShieldAlert, SkipBack, Timer, Play, Square } from "lucide-react";
 
 export default function AdminPage() {
-  const { state, updateState, isConnected, triggerSkipAudio } = useSyncState("admin");
+  const { state, updateState, isConnected, channelStatus, triggerSkipAudio } = useSyncState("admin");
   const { sceneIndex, timeConfig, transitionTimings, muted, autoTriggerConfig } = state;
+
+  // Launch feedback
+  const [launchFeedback, setLaunchFeedback] = useState<string | null>(null);
 
   // Local state for forms
   const [simTimeInput, setSimTimeInput] = useState(timeConfig.simulatedTime);
@@ -136,11 +139,13 @@ export default function AdminPage() {
           
           <div className="flex items-center gap-3 flex-wrap">
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
-              process.env.NEXT_PUBLIC_SUPABASE_URL 
+              channelStatus === 'SUBSCRIBED'
                 ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400' 
-                : 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400'
+                : channelStatus === 'connecting'
+                ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400 animate-pulse'
+                : 'border-red-500/50 bg-red-500/10 text-red-400'
             }`}>
-              {process.env.NEXT_PUBLIC_SUPABASE_URL ? '☁️ Cloud Sync' : '💻 Local Only'}
+              {channelStatus === 'SUBSCRIBED' ? '☁️ Cloud Ready' : channelStatus === 'connecting' ? '⏳ Connecting...' : channelStatus === 'local-only' ? '💻 Local Only' : `⚠️ ${channelStatus}`}
             </div>
             <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border ${isConnected ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' : 'border-red-500/50 bg-red-500/10 text-red-400'}`}>
               <Activity size={16} className={isConnected ? "animate-pulse" : ""} />
@@ -161,11 +166,20 @@ export default function AdminPage() {
                 <div className="text-xs text-gray-500 mt-1">Resets to Scene 1 → auto-advances through all scenes</div>
               </div>
               <button
-                onClick={() => handleSceneChange(1)}
+                onClick={() => {
+                  handleSceneChange(1);
+                  setLaunchFeedback("✅ LAUNCHED! Scene 1 triggered.");
+                  setTimeout(() => setLaunchFeedback(null), 3000);
+                }}
                 className="w-full sm:w-auto px-10 py-5 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-black text-xl uppercase tracking-widest rounded-lg shadow-lg shadow-red-600/30 hover:shadow-red-500/50 transition-all duration-200 flex items-center justify-center gap-3 whitespace-nowrap"
               >
                 <AlertTriangle size={24} /> LAUNCH
               </button>
+              {launchFeedback && (
+                <div className="w-full sm:w-auto text-center text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-4 py-2 rounded animate-pulse">
+                  {launchFeedback}
+                </div>
+              )}
             </div>
           </section>
 
