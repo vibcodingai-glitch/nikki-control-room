@@ -136,11 +136,11 @@ export default function AdminPage() {
           
           <div className="flex items-center gap-3 flex-wrap">
             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
-              typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL 
+              process.env.NEXT_PUBLIC_SUPABASE_URL 
                 ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400' 
                 : 'border-yellow-500/50 bg-yellow-500/10 text-yellow-400'
             }`}>
-              {typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SUPABASE_URL ? '☁️ Cloud Sync' : '💻 Local Only'}
+              {process.env.NEXT_PUBLIC_SUPABASE_URL ? '☁️ Cloud Sync' : '💻 Local Only'}
             </div>
             <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border ${isConnected ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' : 'border-red-500/50 bg-red-500/10 text-red-400'}`}>
               <Activity size={16} className={isConnected ? "animate-pulse" : ""} />
