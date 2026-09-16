@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { createClient, RealtimeChannel } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
 export type GlobalState = {
   sceneIndex: number;
@@ -21,12 +21,6 @@ export const DEFAULT_STATE: GlobalState = {
   autoTriggerConfig: { enabled: false, triggerTime: "00:00:00" }
 };
 
-type SyncMessage = 
-  | { type: "STATE_UPDATE"; payload: GlobalState }
-  | { type: "PING"; from: "admin" | "display" }
-  | { type: "PONG"; from: "admin" | "display" }
-  | { type: "SKIP_AUDIO" };
-
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
@@ -36,179 +30,190 @@ export function useSyncState(role: "admin" | "display") {
   const [isConnected, setIsConnected] = useState(false);
   const [channelStatus, setChannelStatus] = useState<string>("connecting");
   
-  const supabaseChannelRef = useRef<RealtimeChannel | null>(null);
   const localChannelRef = useRef<BroadcastChannel | null>(null);
-  const lastPongRef = useRef<number>(Date.now());
-  const isSubscribedRef = useRef(false);
   const eventsRef = useRef(typeof EventTarget !== "undefined" ? new EventTarget() : null);
+  const lastPongRef = useRef<number>(Date.now());
+  const isWritingRef = useRef(false); // Prevent echo loops
 
-  // Broadcast a message via whatever channel is active
-  const broadcast = useCallback((msg: SyncMessage) => {
-    // Try Supabase first
-    if (supabaseChannelRef.current && isSubscribedRef.current) {
-      supabaseChannelRef.current.send({ 
-        type: "broadcast", 
-        event: "SYNC", 
-        payload: msg 
-      }).then((result) => {
-        if (result !== "ok") {
-          console.warn("Supabase broadcast returned:", result);
-        }
-      }).catch((err) => {
-        console.error("Supabase broadcast error:", err);
-      });
-    }
-    // Also try local channel as fallback (for same-browser tabs)
-    if (localChannelRef.current) {
-      try {
-        localChannelRef.current.postMessage(msg);
-      } catch (e) {}
-    }
-  }, []);
-
-  const handleIncomingMessage = useCallback((msg: SyncMessage) => {
-    if (msg.type === "STATE_UPDATE") {
-      setState(msg.payload);
-      localStorage.setItem("control-room-state", JSON.stringify(msg.payload));
-    } else if (msg.type === "PING") {
-      if (msg.from !== role) {
-        lastPongRef.current = Date.now();
-        setIsConnected(true);
-        // Reply with PONG
-        if (supabaseChannelRef.current && isSubscribedRef.current) {
-          supabaseChannelRef.current.send({ 
-            type: "broadcast", event: "SYNC", 
-            payload: { type: "PONG", from: role } 
-          }).catch(() => {});
-        }
-        if (localChannelRef.current) {
-          try { localChannelRef.current.postMessage({ type: "PONG", from: role }); } catch(e) {}
-        }
-      }
-    } else if (msg.type === "PONG") {
-      if (msg.from !== role) {
-        lastPongRef.current = Date.now();
-        setIsConnected(true);
-      }
-    } else if (msg.type === "SKIP_AUDIO" && role === "display") {
-      eventsRef.current?.dispatchEvent(new Event("skip_audio"));
-    }
-  }, [role]);
-
+  // ─── Read initial state from Supabase DB ───
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // 1. Initialize state from localStorage (fastest initial load)
+    // Read localStorage first for instant render
     const saved = localStorage.getItem("control-room-state");
     if (saved) {
-      try {
-        setState(prev => ({ ...prev, ...JSON.parse(saved) }));
-      } catch (e) {}
+      try { setState(prev => ({ ...prev, ...JSON.parse(saved) })); } catch (e) {}
     }
 
-    // 2a. Always setup local BroadcastChannel (works for same-browser tabs)
+    if (!supabase) {
+      setChannelStatus("local-only");
+      return;
+    }
+
+    // Fetch latest state from the database
+    supabase
+      .from("control_room_state")
+      .select("state")
+      .eq("id", "singleton")
+      .single()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Failed to read state from Supabase:", error.message);
+          return;
+        }
+        if (data?.state) {
+          const dbState = { ...DEFAULT_STATE, ...data.state } as GlobalState;
+          setState(dbState);
+          localStorage.setItem("control-room-state", JSON.stringify(dbState));
+          console.log(`[${role}] Loaded state from DB:`, dbState.sceneIndex);
+        }
+      });
+  }, [role]);
+
+  // ─── Subscribe to Realtime changes on the DB row ───
+  useEffect(() => {
+    if (typeof window === "undefined" || !supabase) return;
+
+    console.log(`[${role}] Subscribing to Realtime postgres_changes...`);
+    setChannelStatus("connecting");
+
+    const channel = supabase
+      .channel("db-state-sync")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "control_room_state",
+          filter: "id=eq.singleton",
+        },
+        (payload) => {
+          // Don't process our own writes
+          if (isWritingRef.current) {
+            isWritingRef.current = false;
+            return;
+          }
+
+          const newState = payload.new as { state: GlobalState };
+          if (newState?.state) {
+            const merged = { ...DEFAULT_STATE, ...newState.state };
+            setState(merged);
+            localStorage.setItem("control-room-state", JSON.stringify(merged));
+            console.log(`[${role}] Received DB update: scene`, merged.sceneIndex);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log(`[${role}] Realtime status:`, status);
+        setChannelStatus(status);
+        if (status === "SUBSCRIBED") {
+          setIsConnected(true);
+          console.log(`[${role}] ✅ Connected to Supabase Realtime DB!`);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [role]);
+
+  // ─── Local BroadcastChannel for same-browser tabs ───
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
     try {
       const localChannel = new BroadcastChannel("control-room-sync");
       localChannelRef.current = localChannel;
-      localChannel.onmessage = (event: MessageEvent<SyncMessage>) => {
-        handleIncomingMessage(event.data);
+
+      localChannel.onmessage = (event: MessageEvent) => {
+        const msg = event.data;
+        if (msg.type === "STATE_UPDATE") {
+          setState(msg.payload);
+          localStorage.setItem("control-room-state", JSON.stringify(msg.payload));
+        } else if (msg.type === "PING" && msg.from !== role) {
+          lastPongRef.current = Date.now();
+          setIsConnected(true);
+          localChannel.postMessage({ type: "PONG", from: role });
+        } else if (msg.type === "PONG" && msg.from !== role) {
+          lastPongRef.current = Date.now();
+          setIsConnected(true);
+        } else if (msg.type === "SKIP_AUDIO" && role === "display") {
+          eventsRef.current?.dispatchEvent(new Event("skip_audio"));
+        }
+      };
+
+      // Heartbeat for local connection detection
+      const pingInterval = setInterval(() => {
+        try { localChannel.postMessage({ type: "PING", from: role }); } catch(e) {}
+      }, 1500);
+
+      const checkInterval = setInterval(() => {
+        // Only check local pong if we don't have Supabase
+        if (!supabase && Date.now() - lastPongRef.current > 4000) {
+          setIsConnected(false);
+        }
+      }, 1500);
+
+      return () => {
+        localChannel.close();
+        clearInterval(pingInterval);
+        clearInterval(checkInterval);
       };
     } catch (e) {
       console.warn("BroadcastChannel not supported");
     }
+  }, [role]);
 
-    // 2b. Setup Supabase Realtime (works across devices over internet)
-    if (supabase) {
-      console.log(`[${role}] Initializing Supabase Realtime...`);
-      setChannelStatus("connecting");
+  // ─── localStorage fallback for cross-tab ───
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-      const realtimeChannel = supabase.channel("control-room-sync", {
-        config: { broadcast: { self: false } }
-      });
-
-      supabaseChannelRef.current = realtimeChannel;
-
-      realtimeChannel
-        .on("broadcast", { event: "SYNC" }, ({ payload }) => {
-          handleIncomingMessage(payload as SyncMessage);
-        })
-        .subscribe((status) => {
-          console.log(`[${role}] Supabase channel status:`, status);
-          setChannelStatus(status);
-          if (status === "SUBSCRIBED") {
-            isSubscribedRef.current = true;
-            console.log(`[${role}] ✅ Connected to Supabase Realtime!`);
-          } else if (status === "CLOSED" || status === "CHANNEL_ERROR") {
-            isSubscribedRef.current = false;
-            console.error(`[${role}] ❌ Supabase channel error:`, status);
-          }
-        });
-    } else {
-      console.log("No Supabase credentials found, using local sync only");
-      setChannelStatus("local-only");
-    }
-
-    // 3. Fallback sync via localStorage storage event
     const handleStorage = (e: StorageEvent) => {
       if (e.key === "control-room-state" && e.newValue) {
-        try {
-          setState(prev => ({ ...prev, ...JSON.parse(e.newValue!) }));
-        } catch (err) {}
+        try { setState(prev => ({ ...prev, ...JSON.parse(e.newValue!) })); } catch (err) {}
       }
     };
     window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
-    // 4. Heartbeat
-    const pingInterval = setInterval(() => {
-      const pingMsg: SyncMessage = { type: "PING", from: role };
-      if (supabaseChannelRef.current && isSubscribedRef.current) {
-        supabaseChannelRef.current.send({ 
-          type: "broadcast", event: "SYNC", payload: pingMsg 
-        }).catch(() => {});
-      }
-      if (localChannelRef.current) {
-        try { localChannelRef.current.postMessage(pingMsg); } catch(e) {}
-      }
-    }, 1500);
-
-    const checkInterval = setInterval(() => {
-      if (Date.now() - lastPongRef.current > 4000) {
-        setIsConnected(false);
-      }
-    }, 1500);
-
-    return () => {
-      if (supabaseChannelRef.current) {
-        supabase?.removeChannel(supabaseChannelRef.current);
-        isSubscribedRef.current = false;
-      }
-      if (localChannelRef.current) {
-        localChannelRef.current.close();
-      }
-      window.removeEventListener("storage", handleStorage);
-      clearInterval(pingInterval);
-      clearInterval(checkInterval);
-    };
-  }, [role, handleIncomingMessage]);
-
+  // ─── Update state: writes to DB + broadcasts locally ───
   const updateState = useCallback((updater: Partial<GlobalState> | ((prev: GlobalState) => GlobalState)) => {
     setState((prev) => {
       const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
       localStorage.setItem("control-room-state", JSON.stringify(next));
+
+      // Broadcast locally (same browser)
+      if (localChannelRef.current) {
+        try { localChannelRef.current.postMessage({ type: "STATE_UPDATE", payload: next }); } catch(e) {}
+      }
+
+      // Write to Supabase DB (cross-device)
+      if (supabase) {
+        isWritingRef.current = true;
+        supabase
+          .from("control_room_state")
+          .update({ state: next, updated_at: new Date().toISOString() })
+          .eq("id", "singleton")
+          .then(({ error }) => {
+            if (error) {
+              console.error("Failed to write state to Supabase:", error.message);
+              isWritingRef.current = false;
+            } else {
+              console.log(`[updateState] Wrote scene ${next.sceneIndex} to DB`);
+            }
+          });
+      }
+
       return next;
     });
-
-    // Broadcast OUTSIDE of setState (side effects should not be in setState)
-    // Use a microtask to ensure state is committed first
-    queueMicrotask(() => {
-      const currentState = JSON.parse(localStorage.getItem("control-room-state") || "{}");
-      broadcast({ type: "STATE_UPDATE", payload: currentState });
-    });
-  }, [broadcast]);
+  }, []);
 
   const triggerSkipAudio = useCallback(() => {
-    broadcast({ type: "SKIP_AUDIO" } as SyncMessage);
-  }, [broadcast]);
+    if (localChannelRef.current) {
+      try { localChannelRef.current.postMessage({ type: "SKIP_AUDIO" }); } catch(e) {}
+    }
+  }, []);
 
   return { state, updateState, isConnected, channelStatus, triggerSkipAudio, events: eventsRef.current };
 }
