@@ -23,7 +23,15 @@ export const DEFAULT_STATE: GlobalState = {
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+
+let supabase: any = null;
+try {
+  if (supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith("http")) {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  }
+} catch (e) {
+  console.warn("Failed to initialize Supabase client. Check your URL in Vercel settings.", e);
+}
 
 export function useSyncState(role: "admin" | "display") {
   const [state, setState] = useState<GlobalState>(DEFAULT_STATE);
@@ -56,7 +64,7 @@ export function useSyncState(role: "admin" | "display") {
       .select("state")
       .eq("id", "singleton")
       .single()
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: any, error: any }) => {
         if (error) {
           console.error("Failed to read state from Supabase:", error.message);
           return;
@@ -87,7 +95,7 @@ export function useSyncState(role: "admin" | "display") {
           table: "control_room_state",
           filter: "id=eq.singleton",
         },
-        (payload) => {
+        (payload: any) => {
           // Don't process our own writes
           if (isWritingRef.current) {
             isWritingRef.current = false;
@@ -103,7 +111,7 @@ export function useSyncState(role: "admin" | "display") {
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         console.log(`[${role}] Realtime status:`, status);
         setChannelStatus(status);
         if (status === "SUBSCRIBED") {
@@ -195,7 +203,7 @@ export function useSyncState(role: "admin" | "display") {
           .from("control_room_state")
           .update({ state: next, updated_at: new Date().toISOString() })
           .eq("id", "singleton")
-          .then(({ error }) => {
+          .then(({ error }: { error: any }) => {
             if (error) {
               console.error("Failed to write state to Supabase:", error.message);
               isWritingRef.current = false;
