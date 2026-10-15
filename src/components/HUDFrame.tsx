@@ -49,13 +49,21 @@ const StatusBadge = ({ text, position, color }: { text: string; position: string
   </div>
 );
 
-export const HUDFrame = ({ children, sceneIndex }: { children: React.ReactNode; sceneIndex: number }) => {
+export const HUDFrame = ({ 
+  children, 
+  sceneIndex,
+  mode = "birthday" 
+}: { 
+  children: React.ReactNode; 
+  sceneIndex: number;
+  mode?: "birthday" | "visitor";
+}) => {
   const isAlertPhase = sceneIndex >= 1 && sceneIndex <= 4;
   const isCelebration = sceneIndex >= 5;
   const bracketColor = isAlertPhase
     ? "border-[var(--color-brand-coral)]"
     : isCelebration
-    ? "border-[var(--color-brand-coral)]/40"
+    ? (mode === "visitor" ? "border-[var(--color-brand-green)]" : "border-[var(--color-brand-coral)]/40")
     : "border-[var(--color-brand-green)]";
   const rainColor = isAlertPhase ? "text-red-500/15" : "text-emerald-500/15";
   const accentHex = isAlertPhase ? "#D63C2C" : "#3FA66E";

@@ -305,8 +305,13 @@ const PipelineColumn: React.FC<{
   );
 };
 
-export const LiveDashboard = () => {
+export const LiveDashboard = ({
+  timeConfig,
+}: {
+  timeConfig?: { useRealTime: boolean; simulatedTime: string };
+} = {}) => {
   const { state } = useSyncState("display");
+  const activeTimeConfig = timeConfig ?? state.timeConfig;
   const [time, setTime] = useState(new Date());
   const [visibleEnteringIdx, setVisibleEnteringIdx] = useState(0);
 
@@ -316,8 +321,8 @@ export const LiveDashboard = () => {
     // and just add elapsed time to it so the clock keeps ticking.
     let baseOffset = 0;
     
-    if (!state.timeConfig.useRealTime) {
-      const parts = state.timeConfig.simulatedTime.split(':');
+    if (!activeTimeConfig.useRealTime) {
+      const parts = activeTimeConfig.simulatedTime.split(':');
       const simDate = new Date();
       simDate.setHours(parseInt(parts[0] || '0'));
       simDate.setMinutes(parseInt(parts[1] || '0'));
@@ -333,7 +338,7 @@ export const LiveDashboard = () => {
     setTime(new Date(Date.now() + baseOffset));
     
     return () => clearInterval(timer);
-  }, [state.timeConfig]);
+  }, [activeTimeConfig]);
 
   useEffect(() => {
     // Cycle entering feed very rapidly (2.5 seconds) to create busy movement
