@@ -38,7 +38,13 @@ export function useSyncState(role: "admin" | "display") {
     // 1. Load initial state
     const saved = localStorage.getItem("control-room-state");
     if (saved) {
-      try { setState(prev => ({ ...prev, ...JSON.parse(saved) })); } catch (e) {}
+      try { 
+        const parsed = JSON.parse(saved);
+        if (role === "display") {
+          parsed.sceneIndex = 0;
+        }
+        setState(prev => ({ ...prev, ...parsed })); 
+      } catch (e) {}
     }
 
     // 2. Setup BroadcastChannel
