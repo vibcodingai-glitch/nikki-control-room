@@ -115,8 +115,8 @@ export default function VisitorDisplayPage() {
       // Perimeter alert: 6s
       timeout = setTimeout(() => updateState({ sceneIndex: 2 }), Math.round(6000 * speedMultiplier));
     } else if (sceneIndex === 2) {
-      // Headcount: 8s
-      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), Math.round(8000 * speedMultiplier));
+      // Self-running Escalation: 12s
+      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), Math.round(12000 * speedMultiplier));
     } else if (sceneIndex === 3) {
       // Identity scan: 10s
       timeout = setTimeout(() => updateState({ sceneIndex: 4 }), Math.round(10000 * speedMultiplier));

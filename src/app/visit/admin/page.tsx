@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useVisitSyncState } from "@/lib/useVisitSyncState";
 import { 
-  Users, 
   Activity, 
   Power, 
   Clock, 
@@ -17,28 +16,23 @@ import {
   Play, 
   Square,
   Zap,
-  Plus,
-  Minus,
-  RotateCcw,
-  Camera,
-  CameraOff
+  RotateCcw
 } from "lucide-react";
-import { getTierCopy } from "@/lib/visitorCopy";
 
 const SCENE_NAMES = [
   "0: Dashboard Idle",
   "1: Perimeter Alert",
-  "2: Headcount & Escalation",
+  "2: Self-Running Escalation",
   "3: Identity Scan",
   "4: Reclassification Countdown",
   "5: Welcome Reveal",
-  "6: Subtext & Delegation Count",
+  "6: Subtext & Team Motto",
   "7: Incident Report / Pass QR"
 ];
 
 export default function VisitAdminPage() {
   const { state, updateState, isConnected, channelStatus, triggerSkipAudio } = useVisitSyncState("admin");
-  const { sceneIndex, guestCount, fastMode, timeConfig, transitionTimings, muted, autoTriggerConfig } = state;
+  const { sceneIndex, fastMode, timeConfig, transitionTimings, muted, autoTriggerConfig } = state;
 
   const [launchFeedback, setLaunchFeedback] = useState<string | null>(null);
 
@@ -52,75 +46,6 @@ export default function VisitAdminPage() {
   const [countdownRemaining, setCountdownRemaining] = useState<number | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const targetTimeRef = useRef<number | null>(null);
-
-  // Optional Camera Face Detection State
-  const [cameraActive, setCameraActive] = useState(false);
-  const [cameraExpanded, setCameraExpanded] = useState(false);
-  const [detectedFaces, setDetectedFaces] = useState<number | null>(null);
-  const [autoSyncCamera, setAutoSyncCamera] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const detectorRef = useRef<any>(null);
-
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: { ideal: 320 }, height: { ideal: 240 } } 
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      setCameraActive(true);
-
-      if (typeof window !== "undefined" && "FaceDetector" in window) {
-        try {
-          detectorRef.current = new (window as any).FaceDetector({ fastMode: true, maxDetectedFaces: 25 });
-        } catch {}
-      }
-    } catch (err: any) {
-      alert("Camera access unavailable: " + (err?.message || err));
-    }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    setCameraActive(false);
-    setDetectedFaces(null);
-  };
-
-  useEffect(() => {
-    if (!cameraActive) return;
-
-    const interval = setInterval(async () => {
-      if (!videoRef.current || !detectorRef.current) return;
-      try {
-        const faces = await detectorRef.current.detect(videoRef.current);
-        const count = faces ? faces.length : 0;
-        setDetectedFaces(count);
-        if (autoSyncCamera && count > 0) {
-          updateState({ guestCount: count });
-        }
-      } catch {}
-    }, 600);
-
-    return () => clearInterval(interval);
-  }, [cameraActive, autoSyncCamera, updateState]);
-
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-      }
-    };
-  }, []);
 
   useEffect(() => {
     setSimTimeInput(timeConfig.simulatedTime);
@@ -148,19 +73,6 @@ export default function VisitAdminPage() {
   const handleApplyTimings = () => {
     updateState({ transitionTimings: timingsInput });
   };
-
-  // Guest Count operations
-  const handleCountChange = (delta: number) => {
-    const next = Math.max(0, Math.min(99, (guestCount || 0) + delta));
-    updateState({ guestCount: next });
-  };
-
-  const handleSetExactCount = (val: number) => {
-    const next = Math.max(0, Math.min(99, val));
-    updateState({ guestCount: next });
-  };
-
-  const tierInfo = getTierCopy(guestCount);
 
   // Countdown logic
   const startCountdown = useCallback(() => {
@@ -230,7 +142,7 @@ export default function VisitAdminPage() {
         {/* Header */}
         <header className="flex items-center justify-between border-b border-gray-800 pb-4 flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <Users className="text-emerald-500" size={28} />
+            <ShieldAlert className="text-emerald-500" size={28} />
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-white tracking-widest uppercase flex items-center gap-2">
                 Visitor Experience Operator
@@ -259,192 +171,11 @@ export default function VisitAdminPage() {
           </div>
         </header>
 
-        {/* TOP ROW: GUEST COUNTER PANEL (Prominent) & QUICK LAUNCH */}
+        {/* TOP ROW: CINEMATIC LAUNCH & SEQUENCE MONITOR */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* GUEST COUNTER PANEL (7 cols) */}
-          <section className="lg:col-span-7 bg-[#0A0E12] border-2 border-emerald-500/40 rounded-xl p-6 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500" />
-            
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-emerald-400 text-xs uppercase font-bold tracking-widest">
-                <Users size={16} /> Guest Counter (Live Sync)
-              </div>
-              <span 
-                className="px-3 py-1 rounded text-xs font-bold tracking-widest uppercase border"
-                style={{ 
-                  color: tierInfo.threatColor, 
-                  borderColor: `${tierInfo.threatColor}60`,
-                  backgroundColor: `${tierInfo.threatColor}15`
-                }}
-              >
-                TIER: {tierInfo.tier.toUpperCase()} ({tierInfo.threatLevelText})
-              </span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              
-              {/* Big Counter Buttons */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => handleCountChange(-1)}
-                  disabled={guestCount <= 0}
-                  className="w-14 h-14 rounded-lg bg-gray-900 border border-gray-700 hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-white active:scale-95 transition"
-                  title="Minus 1 guest"
-                >
-                  <Minus size={24} />
-                </button>
-
-                <div className="flex flex-col items-center">
-                  <input
-                    type="number"
-                    min="0"
-                    max="99"
-                    value={guestCount}
-                    onChange={(e) => handleSetExactCount(parseInt(e.target.value) || 0)}
-                    className="w-24 text-center font-black text-5xl bg-black border-2 border-emerald-500/50 rounded-lg py-1 text-emerald-400 focus:outline-none focus:border-emerald-400 tabular-nums shadow-inner"
-                  />
-                  <span className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Colleagues</span>
-                </div>
-
-                <button
-                  onClick={() => handleCountChange(1)}
-                  className="w-14 h-14 rounded-lg bg-emerald-600/30 border-2 border-emerald-500 text-emerald-300 hover:bg-emerald-600/40 flex items-center justify-center active:scale-95 transition font-bold shadow-lg shadow-emerald-900/30"
-                  title="Plus 1 guest"
-                >
-                  <Plus size={26} />
-                </button>
-              </div>
-
-              {/* Quick Preset Buttons */}
-              <div className="flex flex-col gap-2 w-full sm:w-auto">
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => handleCountChange(1)}
-                    className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-xs rounded text-gray-200 font-bold transition"
-                  >
-                    +1
-                  </button>
-                  <button
-                    onClick={() => handleCountChange(2)}
-                    className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-xs rounded text-gray-200 font-bold transition"
-                  >
-                    +2
-                  </button>
-                  <button
-                    onClick={() => handleCountChange(5)}
-                    className="px-3 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-xs rounded text-gray-200 font-bold transition"
-                  >
-                    +5
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => handleSetExactCount(1)}
-                    className="px-3 py-1.5 bg-gray-900/80 hover:bg-gray-800 border border-gray-800 text-[11px] rounded text-gray-400 transition"
-                  >
-                    Set to 1
-                  </button>
-                  <button
-                    onClick={() => handleSetExactCount(0)}
-                    className="px-3 py-1.5 bg-red-950/20 hover:bg-red-950/40 border border-red-900/40 text-[11px] rounded text-red-400 transition flex items-center justify-center gap-1"
-                  >
-                    <RotateCcw size={12} /> Reset 0
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-gray-800 flex items-center justify-between text-xs text-gray-400">
-              <span>Display Assessment: <strong className="text-white">{tierInfo.assessment}</strong></span>
-              <button
-                onClick={() => setCameraExpanded((prev) => !prev)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-900 border border-gray-700 hover:border-gray-500 text-[10px] text-gray-300 font-mono transition"
-              >
-                <Camera size={12} className="text-emerald-400" />
-                {cameraExpanded ? "Hide Camera Tool" : "AI Camera Counter (Optional)"}
-              </button>
-            </div>
-
-            {/* Optional Webcam Face Detection Tray */}
-            {cameraExpanded && (
-              <div className="mt-3 p-3 bg-black/60 border border-emerald-500/30 rounded-lg text-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-[11px] uppercase tracking-wider">
-                    <Camera size={14} /> On-Device Headcount Detection
-                  </div>
-                  <span className="text-[9px] text-gray-500">100% Local · No frames stored or transmitted</span>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-40 h-28 bg-gray-950 border border-gray-800 rounded relative overflow-hidden flex items-center justify-center">
-                    <video 
-                      ref={videoRef} 
-                      className={`w-full h-full object-cover ${cameraActive ? "block" : "hidden"}`} 
-                      playsInline 
-                      muted 
-                    />
-                    {!cameraActive && (
-                      <div className="text-center text-gray-600 p-2 text-[10px]">
-                        Camera is currently stopped.
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1 space-y-2 w-full">
-                    <div className="flex gap-2">
-                      {!cameraActive ? (
-                        <button
-                          onClick={startCamera}
-                          className="px-3 py-1.5 bg-emerald-600/30 border border-emerald-500 text-emerald-300 rounded font-bold text-xs hover:bg-emerald-600/50 transition flex items-center gap-1.5"
-                        >
-                          <Camera size={14} /> Start Camera
-                        </button>
-                      ) : (
-                        <button
-                          onClick={stopCamera}
-                          className="px-3 py-1.5 bg-red-950/40 border border-red-700 text-red-400 rounded text-xs hover:bg-red-900/40 transition flex items-center gap-1.5"
-                        >
-                          <CameraOff size={14} /> Stop Camera
-                        </button>
-                      )}
-
-                      {cameraActive && detectedFaces !== null && (
-                        <button
-                          onClick={() => handleSetExactCount(detectedFaces)}
-                          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded text-xs transition"
-                        >
-                          Apply Count ({detectedFaces})
-                        </button>
-                      )}
-                    </div>
-
-                    {cameraActive && (
-                      <div className="flex items-center gap-4 text-xs font-mono">
-                        <span className="text-emerald-400 font-bold">
-                          Detected: {detectedFaces !== null ? `${detectedFaces} face(s)` : "Scanning..."}
-                        </span>
-                        <label className="flex items-center gap-1.5 text-gray-400 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={autoSyncCamera}
-                            onChange={(e) => setAutoSyncCamera(e.target.checked)}
-                            className="accent-emerald-500 w-3 h-3"
-                          />
-                          <span className="text-[11px]">Auto-Sync to Counter</span>
-                        </label>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
-
-          {/* QUICK LAUNCH & FAST MODE (5 cols) */}
-          <section className="lg:col-span-5 bg-gradient-to-br from-red-950/40 via-red-900/20 to-black border-2 border-red-500/40 rounded-xl p-6 shadow-xl flex flex-col justify-between">
+          {/* QUICK LAUNCH & FAST MODE (7 cols) */}
+          <section className="lg:col-span-7 bg-gradient-to-br from-red-950/40 via-red-900/20 to-black border-2 border-red-500/40 rounded-xl p-6 shadow-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] text-red-400 uppercase tracking-[0.25em] font-bold">
@@ -455,7 +186,7 @@ export default function VisitAdminPage() {
                 <label className="flex items-center gap-2 cursor-pointer bg-black/60 px-2.5 py-1 rounded border border-gray-800 hover:border-gray-700">
                   <Zap size={14} className={fastMode ? "text-amber-400" : "text-gray-500"} />
                   <span className={`text-xs ${fastMode ? "text-amber-400 font-bold" : "text-gray-400"}`}>
-                    Fast Mode (~35%)
+                    Fast Mode (~35% faster)
                   </span>
                   <input
                     type="checkbox"
@@ -466,22 +197,22 @@ export default function VisitAdminPage() {
                 </label>
               </div>
 
-              <div className="text-lg text-white font-bold">Launch Visitor Experience</div>
-              <p className="text-xs text-gray-400 mt-1">
-                Launches Scene 1 with <strong className="text-emerald-400">{guestCount} {guestCount === 1 ? "colleague" : "colleagues"}</strong>, then automatically progresses.
+              <div className="text-xl text-white font-bold">Launch Visitor Experience</div>
+              <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                Triggers Scene 1 (Perimeter Alert), followed by the self-running headcount escalation (01 → 02 → 03 → 04..09 → ??), organizational affiliation scan, countdown, and the grand reveal: <strong className="text-emerald-400">WELCOME TO OUR CONTROL ROOM</strong>.
               </p>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-5">
               <button
                 onClick={() => {
                   handleSceneChange(1);
-                  setLaunchFeedback(`✅ LAUNCHED! Triggered with count ${guestCount}`);
+                  setLaunchFeedback("✅ LAUNCHED! Visitor sequence triggered");
                   setTimeout(() => setLaunchFeedback(null), 3000);
                 }}
-                className="w-full py-4 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-black text-lg uppercase tracking-widest rounded-lg shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-3"
+                className="w-full py-4 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-black text-lg uppercase tracking-widest rounded-lg shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-3 cursor-pointer"
               >
-                <AlertTriangle size={22} /> LAUNCH NOW
+                <AlertTriangle size={22} /> LAUNCH VISITOR EXPERIENCE NOW
               </button>
 
               {launchFeedback && (
@@ -489,6 +220,49 @@ export default function VisitAdminPage() {
                   {launchFeedback}
                 </div>
               )}
+            </div>
+          </section>
+
+          {/* ACTIVE STATUS & AUDIO SKIP (5 cols) */}
+          <section className="lg:col-span-5 bg-[#0A0E12] border border-gray-800 rounded-xl p-6 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                  Sequence Status
+                </span>
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                  {sceneIndex === 0 ? "STANDBY" : `IN PROGRESS (SCENE ${sceneIndex})`}
+                </span>
+              </div>
+
+              <div className="text-2xl font-black text-white font-mono truncate">
+                {SCENE_NAMES[sceneIndex] || `Scene ${sceneIndex}`}
+              </div>
+
+              <p className="text-xs text-gray-400 mt-2 font-mono">
+                {sceneIndex === 2 
+                  ? "Scene 2: Running self-escalating counter (01 → 02 → 03 → 04..09 → ??)" 
+                  : sceneIndex === 0 
+                  ? "Display is showing default Idle Delivery Signal Board." 
+                  : "Automatic timed progression is active."}
+              </p>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between gap-3">
+              <button
+                onClick={triggerSkipAudio}
+                className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-700 hover:border-gray-500 text-gray-300 text-xs rounded transition flex items-center gap-2 font-mono"
+                title="Silence active audio alerts immediately"
+              >
+                <VolumeX size={14} className="text-amber-400" /> Silence Audio
+              </button>
+
+              <button
+                onClick={() => handleSceneChange(0)}
+                className="px-3.5 py-2 bg-red-950/20 hover:bg-red-950/40 border border-red-900/40 text-red-400 text-xs rounded transition flex items-center gap-1.5 font-mono"
+              >
+                <RotateCcw size={13} /> Reset to Scene 0
+              </button>
             </div>
           </section>
 

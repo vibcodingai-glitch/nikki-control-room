@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TerminalScanBackground } from "@/components/TerminalScanBackground";
 import { HexDumpStream, NetworkPulse, TypingLog } from "@/components/TechEffects";
 import { useVisitSyncState } from "@/lib/useVisitSyncState";
-import { getTierCopy, visitorCopy } from "@/lib/visitorCopy";
+import { ESCALATION_STAGES, EscalationStageConfig, visitorCopy } from "@/lib/visitorCopy";
 import { useAudio } from "@/components/AudioSystem";
 
 // Pre-calculated deterministic blip positions (angles & distances from center) for up to 12 entities
-const PRESET_BLIPS = [
+const BLIP_CONFIGS = [
   { angle: 45, radius: 45, id: "ENT-01" },
   { angle: 210, radius: 55, id: "ENT-02" },
   { angle: 120, radius: 35, id: "ENT-03" },
@@ -25,133 +25,185 @@ const PRESET_BLIPS = [
   { angle: 280, radius: 32, id: "ENT-12" },
 ];
 
-const getBlipForIndex = (idx: number) => {
-  if (idx < PRESET_BLIPS.length) return PRESET_BLIPS[idx];
-  const angle = (idx * 137.5) % 360; // Golden angle distribution
-  const radius = 25 + ((idx * 19) % 60);
-  return {
-    angle,
-    radius,
-    id: `ENT-${String(idx + 1).padStart(2, "0")}`,
-  };
-};
+const ALL_BLIPS = BLIP_CONFIGS.map((b) => {
+  const rad = (b.angle * Math.PI) / 180;
+  const x = 50 + b.radius * 0.45 * Math.cos(rad);
+  const y = 50 + b.radius * 0.45 * Math.sin(rad);
+  return { ...b, x, y };
+});
 
 export const VScene2 = () => {
-  const { play, isReady } = useAudio();
-  const playAudioRef = useRef(play);
-  playAudioRef.current = play;
-
+  const { play, setBeepGap, volume, isReady } = useAudio();
   const { state } = useVisitSyncState("display");
-  const guestCount = Math.max(1, state.guestCount || 1);
+  const fastMode = state.fastMode;
 
-  // Ticking count for current display
-  const [displayTick, setDisplayTick] = useState(1);
-  const [isCounting, setIsCounting] = useState(false);
-  const [hasEscalated, setHasEscalated] = useState(false);
+  // Track current stage: 0 = A, 1 = B, 2 = C, 3 = D, 4 = E
+  const [stageIndex, setStageIndex] = useState(0);
+  const currentStage: EscalationStageConfig = ESCALATION_STAGES[stageIndex] || ESCALATION_STAGES[0];
 
+  // Visual effects
+  const [counterDisplay, setCounterDisplay] = useState("01");
+  const [activeBlipCount, setActiveBlipCount] = useState(1);
+  const [isGlitching, setIsGlitching] = useState(false);
+  const [screenShake, setScreenShake] = useState(false);
+
+  // Audio helpers via refs to avoid stale closures
+  const playRef = useRef(play);
+  playRef.current = play;
+  const setBeepGapRef = useRef(setBeepGap);
+  setBeepGapRef.current = setBeepGap;
+  const volumeRef = useRef(volume);
+  volumeRef.current = volume;
+
+  // Timings scale for fast mode
+  const scale = fastMode ? 0.65 : 1.0;
+
+  // Main Self-Running Escalation Timeline (12s total; ~7.8s in Fast Mode)
   useEffect(() => {
-    // Single guest case: stable, low-threat, no escalation
-    if (guestCount <= 1) {
-      setDisplayTick(1);
-      setIsCounting(false);
-      setHasEscalated(false);
-      return;
-    }
+    // Stage A starts immediately
+    setStageIndex(0);
+    setCounterDisplay("01");
+    setActiveBlipCount(1);
+    setBeepGapRef.current(ESCALATION_STAGES[0].beepGap);
+    volumeRef.current("alert-beep", ESCALATION_STAGES[0].beepVolume);
 
-    // Multiple guests case (> 1):
-    // Stage 1: Initial detection of 1 entity
-    setDisplayTick(1);
-    setIsCounting(false);
-    setHasEscalated(false);
+    const durA = ESCALATION_STAGES[0].durationMs * scale;
+    const durB = ESCALATION_STAGES[1].durationMs * scale;
+    const durC = ESCALATION_STAGES[2].durationMs * scale;
+    const durD = ESCALATION_STAGES[3].durationMs * scale;
 
-    // Stage 2: Trigger escalation warning & count up the entities
-    let activeInterval: NodeJS.Timeout | null = null;
-    const triggerTimer = setTimeout(() => {
-      setHasEscalated(true);
-      setIsCounting(true);
+    const tAtoB = durA;
+    const tBtoC = tAtoB + durB;
+    const tCtoD = tBtoC + durC;
+    const tDtoE = tCtoD + durD;
+
+    const timeouts: NodeJS.Timeout[] = [];
+    const intervals: NodeJS.Timeout[] = [];
+
+    // Trigger glitch + flip-click utility
+    const triggerStageTransition = (nextIndex: number) => {
+      setStageIndex(nextIndex);
+      const stage = ESCALATION_STAGES[nextIndex];
+      setBeepGapRef.current(stage.beepGap);
+      volumeRef.current("alert-beep", stage.beepVolume);
+
+      setIsGlitching(true);
+      const glitchTimeout = setTimeout(() => setIsGlitching(false), 140);
+      timeouts.push(glitchTimeout);
+
       if (isReady) {
-        playAudioRef.current("flip-click");
+        playRef.current("flip-click");
       }
+    };
 
-      let current = 1;
-      const target = guestCount;
-      // Step duration: give viewers enough time to watch digits tick and meter escalate
-      const stepDuration = target <= 3 ? 550 : target <= 6 ? 380 : target <= 12 ? 220 : 120;
+    // Transition to Stage B (2s)
+    timeouts.push(
+      setTimeout(() => {
+        triggerStageTransition(1);
+        setCounterDisplay("02");
+        setActiveBlipCount(2);
+      }, tAtoB)
+    );
 
-      activeInterval = setInterval(() => {
-        current++;
-        setDisplayTick(current);
-        if (isReady) {
-          playAudioRef.current("flip-click");
-        }
+    // Transition to Stage C (4s)
+    timeouts.push(
+      setTimeout(() => {
+        triggerStageTransition(2);
+        setCounterDisplay("03");
+        setActiveBlipCount(4);
+      }, tBtoC)
+    );
 
-        if (current >= target) {
-          if (activeInterval) clearInterval(activeInterval);
-          setIsCounting(false);
-        }
-      }, stepDuration);
-    }, 750);
+    // Transition to Stage D (6s): counter races 04..09 faster and faster, blips keep spawning
+    timeouts.push(
+      setTimeout(() => {
+        triggerStageTransition(3);
+
+        const raceSteps = [
+          { text: "04", blips: 5, delay: 0 },
+          { text: "05", blips: 6, delay: 420 * scale },
+          { text: "06", blips: 8, delay: 780 * scale },
+          { text: "07", blips: 9, delay: 1080 * scale },
+          { text: "08", blips: 11, delay: 1320 * scale },
+          { text: "09", blips: 12, delay: 1520 * scale },
+          { text: "11", blips: 12, delay: 1700 * scale },
+          { text: "??", blips: 12, delay: 1850 * scale },
+          { text: "09", blips: 12, delay: 1980 * scale },
+          { text: "??", blips: 12, delay: 2100 * scale },
+        ];
+
+        raceSteps.forEach(({ text, blips, delay }) => {
+          timeouts.push(
+            setTimeout(() => {
+              setCounterDisplay(text);
+              setActiveBlipCount(blips);
+              if (isReady) {
+                playRef.current("flip-click");
+              }
+            }, delay)
+          );
+        });
+      }, tCtoD)
+    );
+
+    // Transition to Stage E (9s): glitches into "??" and holds, dense blips, screen shake
+    timeouts.push(
+      setTimeout(() => {
+        triggerStageTransition(4);
+        setCounterDisplay("??");
+        setActiveBlipCount(12);
+
+        // Screen shake + glitch flash
+        setScreenShake(true);
+        timeouts.push(setTimeout(() => setScreenShake(false), 500));
+      }, tDtoE)
+    );
 
     return () => {
-      clearTimeout(triggerTimer);
-      if (activeInterval) clearInterval(activeInterval);
+      timeouts.forEach(clearTimeout);
+      intervals.forEach(clearInterval);
     };
-  }, [guestCount, isReady]);
+  }, [scale, isReady]);
 
-  // Real-time tier evaluation based on current tick
-  const currentTierInfo = useMemo(() => getTierCopy(displayTick), [displayTick]);
-  const finalTierInfo = useMemo(() => getTierCopy(guestCount), [guestCount]);
-
-  // Generate blips for all entities up to guestCount (capped at 24 for clean radar display)
-  const maxPlotCount = Math.min(24, guestCount);
-  const allBlips = useMemo(() => {
-    return Array.from({ length: maxPlotCount }, (_, i) => {
-      const config = getBlipForIndex(i);
-      const rad = (config.angle * Math.PI) / 180;
-      const x = 50 + (config.radius * 0.45) * Math.cos(rad);
-      const y = 50 + (config.radius * 0.45) * Math.sin(rad);
-      return { ...config, x, y };
-    });
-  }, [maxPlotCount]);
-
-  // Visible blips count up in lockstep with displayTick
+  // Active blips plotted on radar
   const visibleBlips = useMemo(() => {
-    return allBlips.slice(0, Math.min(displayTick, allBlips.length));
-  }, [allBlips, displayTick]);
+    return ALL_BLIPS.slice(0, Math.min(activeBlipCount, ALL_BLIPS.length));
+  }, [activeBlipCount]);
 
-  const headcountTelemetry = useMemo(() => {
-    const lines = [
-      `Optical gate: ${guestCount} ${guestCount === 1 ? "entity" : "entities"} in perimeter buffer`,
-      `Biometric centroid tracking: ACTIVE`,
-      `Velocity vector: INBOUND (0.8 m/s)`,
-    ];
-    if (guestCount > 1) {
-      lines.push(`THRESHOLD TRIGGER: GUESTS > 1 DETECTED`);
-      lines.push(`THREAT ASSESSMENT MATRIX: ESCALATING IN REAL TIME`);
-      lines.push(`STATUS: ${finalTierInfo.tier.toUpperCase()} ESCALATION PROTOCOL APPLIED`);
-    } else {
-      lines.push(`Single entity buffer lock: STABLE`);
-      lines.push(`Threat assessment matrix: BASELINE (LOW)`);
-    }
-    return lines;
-  }, [guestCount, finalTierInfo]);
+  const telemetryLines = useMemo(() => [
+    "Perimeter optical scan: ACTIVE",
+    "Biometric centroid tracking: MULTIPLE SIGNALS DETECTED",
+    "Velocity vector: INBOUND (1.2 m/s)",
+    "Headcount resolution: UNSTABLE — INGRESS ACCELERATING",
+    "Threat assessment matrix: CRITICAL ESCALATION PROTOCOL",
+    "Telemetry stream: ARCHIVING EVENT LOG #VISIT-001",
+  ], []);
 
   return (
     <motion.div 
       className="w-full h-screen flex flex-col justify-center items-center px-[6%] relative overflow-hidden"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      animate={screenShake ? { 
+        opacity: 1,
+        x: [-12, 12, -8, 8, -4, 4, -2, 2, 0],
+        y: [-5, 5, -3, 3, 0],
+      } : { opacity: 1, x: 0, y: 0 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: screenShake ? 0.45 : 0.6, ease: [0.4, 0, 0.2, 1] }}
     >
-      {/* Background ambient gradient dynamically tied to current threat level */}
+      {/* Glitch Flash Overlay */}
+      {isGlitching && (
+        <div className="absolute inset-0 pointer-events-none z-50 bg-white/20 mix-blend-screen" />
+      )}
+
+      {/* Background ambient gradient dynamically tied to current stage threat color */}
       <motion.div 
-        className="absolute inset-0 z-0 transition-colors duration-1000"
+        className="absolute inset-0 z-0 transition-colors duration-700"
         style={{
-          background: `radial-gradient(circle at center, ${currentTierInfo.threatColor}22 0%, transparent 65%)`
+          background: `radial-gradient(circle at center, ${currentStage.meterColor}28 0%, transparent 68%)`
         }}
-        animate={{ opacity: [0.15, 0.35, 0.15] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ opacity: currentStage.id === "D" || currentStage.id === "E" ? [0.25, 0.55, 0.25] : [0.15, 0.35, 0.15] }}
+        transition={{ duration: currentStage.id === "E" ? 1.2 : 2, repeat: Infinity, ease: "easeInOut" }}
       />
 
       <TerminalScanBackground color="text-[var(--color-brand-red)]" opacity="opacity-20" intervalMs={100} />
@@ -162,7 +214,7 @@ export const VScene2 = () => {
       {/* Typing telemetry — bottom left */}
       <div className="absolute bottom-10 left-8 z-20 w-[380px] pointer-events-none">
         <TypingLog 
-          messages={headcountTelemetry} 
+          messages={telemetryLines} 
           color="text-red-400/50" 
           typingSpeed={20} 
           lineDelay={700} 
@@ -184,93 +236,80 @@ export const VScene2 = () => {
             </span>
           </div>
 
-          {/* Escalation Warning Banner (shown when guestCount > 1) */}
-          <AnimatePresence>
-            {hasEscalated && guestCount > 1 && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4 }}
-                className="w-full"
-              >
-                <div 
-                  className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded border font-mono text-xs md:text-sm tracking-wide ${
-                    isCounting
-                      ? "bg-amber-950/40 border-amber-500/70 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.25)] animate-pulse"
-                      : "bg-red-950/40 border-red-500/70 text-red-300 shadow-[0_0_20px_rgba(239,68,68,0.25)]"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-amber-400 text-sm md:text-base animate-bounce">⚠</span>
-                    <span className="font-bold tracking-wider uppercase">
-                      {isCounting
-                        ? visitorCopy.headcount.escalatingAlert
-                        : visitorCopy.headcount.escalationCompleteBadge(guestCount)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-300">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                    <span>{isCounting ? "ESCALATING" : "CONFIRMED"}</span>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Self-Running Stage Indicator Banner */}
+          <div className={`flex items-center justify-between gap-3 px-4 py-2 rounded border font-mono text-xs md:text-sm tracking-wide transition-colors duration-500 ${
+            currentStage.id === "E"
+              ? "bg-red-950/60 border-red-500 text-red-300 shadow-[0_0_25px_rgba(239,68,68,0.35)]"
+              : currentStage.id === "D"
+              ? "bg-amber-950/50 border-amber-500 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse"
+              : currentStage.id === "C"
+              ? "bg-orange-950/40 border-orange-500/60 text-orange-300"
+              : "bg-emerald-950/30 border-emerald-500/50 text-emerald-300"
+          }`}>
+            <div className="flex items-center gap-2.5">
+              <span className={`text-base ${currentStage.id === "E" ? "text-red-400 animate-bounce" : "text-amber-400"}`}>
+                ⚠
+              </span>
+              <span className="font-bold tracking-wider uppercase">
+                {currentStage.id === "A" && "PERIMETER LOCK: INITIAL CONTACT"}
+                {currentStage.id === "B" && "GUEST COUNT ESCALATING: ADDITIONAL SIGNAL DETECTED"}
+                {currentStage.id === "C" && "ESCALATING THREAT ASSESSMENT: MULTIPLE GUESTS (>2)"}
+                {currentStage.id === "D" && "RAPID INGRESS DETECTED: COUNT UNRELIABLE"}
+                {currentStage.id === "E" && "MAXIMUM ALERT: GROUP-SIZE INCURSION CONFIRMED"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-300">
+              <span className={`w-2 h-2 rounded-full ${currentStage.id === "E" ? "bg-red-500 animate-ping" : "bg-amber-500 animate-pulse"}`} />
+              <span>{currentStage.id === "E" ? "CRITICAL" : "LIVE SCAN"}</span>
+            </div>
+          </div>
 
           {/* Big Number Tick & Subline */}
           <div className="flex flex-col gap-3">
             <div className="flex items-baseline gap-4 flex-wrap">
               <SplitFlap 
-                text={displayTick.toString().padStart(2, "0")} 
+                text={counterDisplay} 
                 fontSize="text-6xl md:text-8xl lg:text-9xl font-black" 
                 color="text-white text-glow-white" 
                 className="justify-start"
                 mode="flap"
-                flipSpeedMs={45}
+                flipSpeedMs={35}
               />
               <div className="flex flex-col">
                 <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">
-                  {isCounting 
-                    ? "INGRESS IN PROGRESS — COUNTING GUESTS" 
-                    : guestCount > 1 && !hasEscalated 
-                      ? "INITIAL TARGET IDENTIFIED" 
-                      : "CONFIRMED HEADCOUNT"}
+                  {currentStage.headcountLabel}
                 </span>
                 <span 
-                  className="font-mono text-2xl md:text-3xl font-bold tracking-tight transition-colors duration-300"
-                  style={{ color: currentTierInfo.threatColor }}
+                  className="font-mono text-2xl md:text-3xl font-bold tracking-tight transition-colors duration-400"
+                  style={{ color: currentStage.meterColor }}
                 >
-                  {isCounting 
-                    ? `COUNTING: ${displayTick} OF ${guestCount} DETECTED`
-                    : currentTierInfo.countLabel}
+                  {currentStage.headline}
                 </span>
               </div>
             </div>
 
             {/* Tactical Appraisal Box */}
             <motion.div 
-              key={`${currentTierInfo.assessment}-${isCounting}`}
+              key={currentStage.id}
               initial={{ opacity: 0, x: -6 }}
               animate={{ opacity: 1, x: 0 }}
               className="p-4 rounded-lg border bg-black/40 backdrop-blur-sm transition-colors duration-500"
-              style={{ borderColor: `${currentTierInfo.threatColor}60` }}
+              style={{ borderColor: `${currentStage.meterColor}70` }}
             >
               <div className="flex items-center justify-between font-mono text-xs text-gray-400 uppercase tracking-widest mb-1">
                 <span>TACTICAL APPRAISAL</span>
-                {isCounting && (
-                  <span className="text-amber-400 animate-pulse text-[11px] font-bold">
-                    ● ESCALATING IN REAL TIME
-                  </span>
-                )}
+                <span 
+                  className="font-bold text-[11px] animate-pulse"
+                  style={{ color: currentStage.meterColor }}
+                >
+                  ● STAGE {currentStage.id}
+                </span>
               </div>
               <div 
                 className="font-mono text-lg md:text-2xl font-black tracking-wide transition-colors duration-300"
-                style={{ color: currentTierInfo.threatColor }}
+                style={{ color: currentStage.meterColor }}
               >
-                {isCounting 
-                  ? `ESCALATING: ${currentTierInfo.assessment}` 
-                  : currentTierInfo.assessment}
+                {currentStage.appraisal}
               </div>
             </motion.div>
           </div>
@@ -281,9 +320,13 @@ export const VScene2 = () => {
               <span className="text-gray-400 tracking-wider">THREAT LEVEL METER:</span>
               <span 
                 className="font-bold tracking-widest transition-colors duration-300"
-                style={{ color: currentTierInfo.threatColor }}
+                style={{ color: currentStage.meterColor }}
               >
-                {currentTierInfo.threatLevelText} ({currentTierInfo.threatMeterPercent}%)
+                {currentStage.id === "A" && "LOW (20%)"}
+                {currentStage.id === "B" && "MODERATE (40%)"}
+                {currentStage.id === "C" && "ELEVATED (65%)"}
+                {currentStage.id === "D" && "HIGH — PULSING (85%)"}
+                {currentStage.id === "E" && "CRITICAL (100%)"}
               </span>
             </div>
 
@@ -293,10 +336,16 @@ export const VScene2 = () => {
               <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-600" />
               
               <motion.div 
-                className="h-full rounded-sm relative transition-colors duration-500"
-                style={{ backgroundColor: currentTierInfo.threatColor }}
-                animate={{ width: `${currentTierInfo.threatMeterPercent}%` }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="h-full rounded-sm relative transition-colors duration-400"
+                style={{ backgroundColor: currentStage.meterColor }}
+                animate={{ 
+                  width: `${currentStage.meterPercent}%`,
+                  opacity: currentStage.id === "D" ? [0.75, 1, 0.75] : 1
+                }}
+                transition={{ 
+                  width: { duration: 0.35, ease: "easeOut" },
+                  opacity: { repeat: Infinity, duration: 0.5 }
+                }}
               >
                 <div className="absolute inset-0 bg-white/20 animate-pulse" />
               </motion.div>
@@ -317,7 +366,7 @@ export const VScene2 = () => {
           <div className="relative w-[300px] h-[300px] md:w-[360px] md:h-[360px] flex items-center justify-center">
             
             {/* Base Radar Pulse */}
-            <NetworkPulse color={currentTierInfo.threatColor} size={340} />
+            <NetworkPulse color={currentStage.meterColor} size={340} />
 
             {/* Blip entities plotted on radar */}
             <AnimatePresence>
@@ -327,20 +376,21 @@ export const VScene2 = () => {
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.25 }}
                   className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
                   style={{ left: `${blip.x}%`, top: `${blip.y}%` }}
                 >
                   {/* Blip Ping Ring */}
                   <motion.div
-                    className="absolute -inset-3 rounded-full border border-red-500"
+                    className="absolute -inset-3 rounded-full border"
+                    style={{ borderColor: currentStage.meterColor }}
                     animate={{ scale: [1, 2.2], opacity: [0.8, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.6, delay: (idx % 4) * 0.3 }}
+                    transition={{ repeat: Infinity, duration: currentStage.id === "E" ? 0.9 : 1.5, delay: (idx % 4) * 0.25 }}
                   />
                   {/* Blip Core Dot */}
                   <div 
                     className="w-3.5 h-3.5 rounded-full shadow-[0_0_12px_#EF4444] border border-white"
-                    style={{ backgroundColor: currentTierInfo.threatColor }}
+                    style={{ backgroundColor: currentStage.meterColor }}
                   />
                   {/* Blip Identifier Tag */}
                   <span className="absolute -top-4 -left-2 font-mono text-[8px] text-white/80 bg-black/80 px-1 rounded whitespace-nowrap border border-white/20">
@@ -351,8 +401,8 @@ export const VScene2 = () => {
             </AnimatePresence>
 
             {/* Center target crosshair / blip count */}
-            <div className="absolute font-mono text-[9px] text-gray-400 bottom-2 right-2 bg-black/60 px-1.5 py-0.5 rounded border border-white/10">
-              RADAR BLIPS: {displayTick} / {guestCount}
+            <div className="absolute font-mono text-[9px] text-gray-400 bottom-2 right-2 bg-black/60 px-2 py-0.5 rounded border border-white/10 font-bold">
+              {currentStage.radarLabel || `RADAR BLIPS: ${visibleBlips.length}`}
             </div>
           </div>
         </div>

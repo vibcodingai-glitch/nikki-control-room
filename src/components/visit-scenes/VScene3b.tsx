@@ -16,7 +16,6 @@ interface SceneProps {
 export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
   const { play, setBeepGap } = useAudio();
   const { state } = useVisitSyncState("display");
-  const guestCount = Math.max(1, state.guestCount || 1);
   const [countdown, setCountdown] = useState<number | null>(null);
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
     }
   }, [countdown, play, setBeepGap, onAutoAdvance, state.fastMode]);
 
-  const reclassifyText = visitorCopy.countdown.reclassifyHeader(guestCount);
+  const reclassifyText = visitorCopy.countdown.reclassifyHeader;
 
   return (
     <motion.div 

@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { toPng } from "html-to-image";
 import { Download, Truck, CheckCircle2, Building2, MapPin, Hash, Sparkles } from "lucide-react";
 import { ROOM_NAME, visitTheme } from "@/lib/visitorCopy";
-import { useVisitSyncState } from "@/lib/useVisitSyncState";
 
 // Decorative barcode SVG generator based on seed string
 const BarcodePattern = ({ code }: { code: string }) => {
@@ -55,13 +54,16 @@ export default function VisitorPassPage() {
   const [downloading, setDownloading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Read guestCount from visit sync state or localStorage fallback
-  const { state } = useVisitSyncState("display");
-
   // Editable guest inputs (live preview on card)
   const [guestName, setGuestName] = useState("COLLEAGUE");
   const [homeSite, setHomeSite] = useState("OTHER SITE");
-  const [visitorNumber, setVisitorNumber] = useState("001");
+  
+  // Random 3-digit pass number generated on page load (no headcount source)
+  const [passNumber] = useState(() => {
+    const num = Math.floor(Math.random() * 900) + 100;
+    return String(num).padStart(3, "0");
+  });
+
   const [dateStr] = useState(() => {
     const now = new Date();
     return now.toLocaleDateString("en-GB", {
@@ -73,26 +75,7 @@ export default function VisitorPassPage() {
 
   useEffect(() => {
     setMounted(true);
-
-    // Determine visitor number
-    if (state.guestCount && state.guestCount > 0) {
-      setVisitorNumber(state.guestCount.toString().padStart(3, "0"));
-    } else {
-      // Check localStorage
-      try {
-        const saved = localStorage.getItem("visit-state");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed.guestCount) {
-            setVisitorNumber(parsed.guestCount.toString().padStart(3, "0"));
-            return;
-          }
-        }
-      } catch (e) {}
-      // Fallback random 3-digit number
-      setVisitorNumber(Math.floor(Math.random() * 80 + 10).toString().padStart(3, "0"));
-    }
-  }, [state.guestCount]);
+  }, []);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -106,7 +89,7 @@ export default function VisitorPassPage() {
 
       const link = document.createElement("a");
       link.href = image;
-      link.download = `visitor-pass-${visitorNumber}.png`;
+      link.download = `visitor-pass-${passNumber}.png`;
       link.click();
     } catch (err) {
       console.error("Failed to download visitor pass", err);
@@ -215,11 +198,11 @@ export default function VisitorPassPage() {
               </div>
             </div>
 
-            {/* Inbound Tag & Visitor # */}
+            {/* Inbound Tag & Pass # */}
             <div className="text-right font-mono">
               <div className="text-[9px] text-gray-400 tracking-wider">TAG No.</div>
               <div className="text-sm font-bold text-emerald-400">
-                00{visitorNumber}
+                PASS No. 00{passNumber}
               </div>
               <div className="text-[8px] text-gray-400 uppercase tracking-widest mt-0.5">
                 INBOUND // DC
@@ -350,9 +333,9 @@ export default function VisitorPassPage() {
 
               {/* Decorative Barcode */}
               <div className="w-full max-w-[200px]">
-                <BarcodePattern code={`VISITOR-${visitorNumber}-${guestName}`} />
+                <BarcodePattern code={`PASS-${passNumber}-${guestName}`} />
                 <div className="text-[8px] font-mono text-[#061114]/50 tracking-[0.25em] uppercase mt-0.5">
-                  VISITOR No. 00{visitorNumber}
+                  PASS No. 00{passNumber}
                 </div>
               </div>
 

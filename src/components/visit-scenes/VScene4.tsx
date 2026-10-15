@@ -14,8 +14,6 @@ interface SceneProps {
 
 export const VScene4: React.FC<SceneProps> = ({ showSubtext = false }) => {
   const { play, stop, isReady } = useAudio();
-  const { state } = useVisitSyncState("display");
-  const guestCount = Math.max(1, state.guestCount || 1);
   const audioTriggered = useRef(false);
 
   useEffect(() => {
@@ -50,8 +48,7 @@ export const VScene4: React.FC<SceneProps> = ({ showSubtext = false }) => {
     }
   }, [isReady, play, stop]);
 
-  const statusText = visitorCopy.reveal.statusLine(guestCount);
-  const visitingLine = visitorCopy.reveal.visitingCountLine(guestCount);
+  const statusText = visitorCopy.reveal.statusLine;
 
   return (
     <motion.div 
@@ -127,11 +124,6 @@ export const VScene4: React.FC<SceneProps> = ({ showSubtext = false }) => {
 
               <div className="font-mono text-sm md:text-lg text-white/70">
                 {visitorCopy.reveal.subtext2}
-              </div>
-
-              {/* Live Visiting Colleagues Count */}
-              <div className="mt-2 px-5 py-2 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 font-mono text-sm md:text-base font-bold tracking-widest">
-                {visitingLine}
               </div>
             </motion.div>
           )}
