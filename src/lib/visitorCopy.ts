@@ -81,6 +81,17 @@ export const visitorCopy = {
     ],
   },
 
+  // Scene 2: Headcount & Escalation
+  headcount: {
+    liveBadge: "● ENTITY COUNTER LIVE",
+    incursionVector: "INCURSION VECTOR: PRIMARY ACCESS",
+    escalatingAlert: "⚠ GUESTS > 1 DETECTED — ESCALATING THREAT ASSESSMENT",
+    escalationCompleteBadge: (count: number) =>
+      `⚠ GUESTS > 1 DETECTED — ESCALATION CONFIRMED (${count} ENTITIES)`,
+    countingStatus: (current: number, total: number) =>
+      `DETECTING ADDITIONAL ENTITIES… COUNTING GUEST ${current} OF ${total}`,
+  },
+
   // Scene 3: Identity Scan
   identityScan: {
     title: "SCANNING VISITOR PROFILE",
