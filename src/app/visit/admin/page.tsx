@@ -25,9 +25,7 @@ const SCENE_NAMES = [
   "2: Self-Running Escalation",
   "3: Identity Scan",
   "4: Reclassification Countdown",
-  "5: Welcome Reveal",
-  "6: Subtext & Team Motto",
-  "7: Incident Report / Pass QR"
+  "5: Welcome Reveal (VIP Banner)",
 ];
 
 export default function VisitAdminPage() {
@@ -242,10 +240,17 @@ export default function VisitAdminPage() {
               <p className="text-xs text-gray-400 mt-2 font-mono">
                 {sceneIndex === 2 
                   ? "Scene 2: Running self-escalating counter (01 → 02 → 03 → 04..09 → ??)" 
+                  : sceneIndex === 5
+                  ? "Scene 5: Grand Climax — Motion-drawing banner formed with 4 VIPs identified."
                   : sceneIndex === 0 
                   ? "Display is showing default Idle Delivery Signal Board." 
                   : "Automatic timed progression is active."}
               </p>
+
+              <div className="mt-3 flex items-center gap-2 p-2 rounded bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300 font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>CWAR VIP Delegation Banner (Nestlé Execs): Active</span>
+              </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between gap-3">
@@ -297,7 +302,7 @@ export default function VisitAdminPage() {
                   </button>
                   <button 
                     onClick={() => handleSceneChange(sceneIndex + 1)}
-                    disabled={sceneIndex === 7}
+                    disabled={sceneIndex >= 5}
                     className="flex items-center gap-2 px-5 py-2.5 bg-blue-600/20 text-blue-400 border border-blue-500/50 hover:bg-blue-600/30 disabled:opacity-50 disabled:cursor-not-allowed rounded transition font-bold text-sm"
                   >
                     Next <SkipForward size={16} />

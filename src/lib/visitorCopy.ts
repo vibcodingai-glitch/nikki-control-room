@@ -132,7 +132,7 @@ export const visitorCopy = {
     revealedLines: [
       "AFFILIATION: SAME ORGANISATION",
       "LOCATION: OTHER SITE — NOT THIS ONE",
-      "STATUS: COLLEAGUES",
+      "STATUS: VIPs",
       "PURPOSE: CONTROL ROOM VISIT",
       "HOST: SUPPLY CHAIN TEAM",
       "FRIENDLINESS INDEX: 99%",
@@ -141,14 +141,14 @@ export const visitorCopy = {
 
   // Scene 3b: Countdown
   countdown: {
-    reclassifyHeader: "RECLASSIFYING ALL ENTITIES…",
+    reclassifyHeader: "RECLASSIFYING ALL ENTITIES AS VIPs…",
   },
 
-  // Scene 4: Reveal & Subtext
+  // Scene 4: Reveal & Subtext (Grand Climax)
   reveal: {
-    mainWelcome: "WELCOME TO OUR CONTROL ROOM",
-    incidentResolved: "INCIDENT RESOLVED — ACCESS GRANTED",
-    statusLine: "ALL ANOMALIES RESOLVED — UNKNOWNS RECLASSIFIED AS COLLEAGUES",
+    mainWelcome: "WELCOME TO THE CWAR SUPPLY CHAIN CONTROL ROOM",
+    incidentResolved: "INCIDENT RESOLVED — VIP ACCESS GRANTED",
+    statusLine: "ALL ANOMALIES RESOLVED — UNKNOWNS RECLASSIFIED AS VIPs",
     subtext1: "ONE TEAM. MANY SITES.",
     subtext2: "YOUR HOSTS WILL BRIEF YOU SHORTLY",
   },
@@ -165,7 +165,7 @@ export const visitorCopy = {
       "All anomalies cleared from perimeter queue",
       "Visitor passes issued to network registry",
       "Telemetry archived to Supply Chain Central",
-      "Welcome to our control room, colleagues.",
+      "Welcome to our control room, VIPs.",
     ],
   },
 };

@@ -55,7 +55,7 @@ export const VScene3 = () => {
     const timings = [
       3400, // Step 1: Affiliation
       4500, // Step 2: Location
-      5700, // Step 3: Status: COLLEAGUES
+      5700, // Step 3: Status: VIPs
       6900, // Step 4: Purpose
       8000, // Step 5: Host
       9000, // Step 6: Friendliness Index 99% + Drain meter

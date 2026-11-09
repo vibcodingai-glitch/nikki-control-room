@@ -37,8 +37,8 @@ export default function VisitorDisplayPage() {
   }, [events, stop]);
 
   const advanceScene = useCallback(() => {
-    // 0: VScene0, 1: VScene1, 2: VScene2, 3: VScene3, 4: VScene3b, 5: VScene4, 6: VScene4(subtext), 7: VScene5
-    if (sceneIndex < 7 && sceneIndex !== 4) {
+    // 0: VScene0, 1: VScene1, 2: VScene2, 3: VScene3, 4: VScene3b, 5: VScene4 (Grand Finale)
+    if (sceneIndex < 5 && sceneIndex !== 4) {
       updateState({ sceneIndex: sceneIndex + 1 });
     }
   }, [sceneIndex, updateState]);
@@ -120,13 +120,8 @@ export default function VisitorDisplayPage() {
     } else if (sceneIndex === 3) {
       // Identity scan: 10s
       timeout = setTimeout(() => updateState({ sceneIndex: 4 }), Math.round(10000 * speedMultiplier));
-    } else if (sceneIndex === 5) {
-      // Welcome reveal: 5s
-      timeout = setTimeout(() => updateState({ sceneIndex: 6 }), Math.round(5000 * speedMultiplier));
-    } else if (sceneIndex === 6) {
-      // Subtext: 6s
-      timeout = setTimeout(() => updateState({ sceneIndex: 7 }), Math.round(6000 * speedMultiplier));
     }
+    // Scene 5 (VScene4) is the Grand Climax / Final Screen — holds indefinitely with zero distortion banner
 
     return () => {
       if (timeout) clearTimeout(timeout);
@@ -139,7 +134,7 @@ export default function VisitorDisplayPage() {
     <main 
       className="w-full h-screen overflow-hidden bg-[var(--background)] text-white relative cursor-pointer selection:bg-transparent"
       onClick={() => {
-        if (sceneIndex >= 0 && sceneIndex !== 4) advanceScene();
+        if (sceneIndex >= 0 && sceneIndex < 5 && sceneIndex !== 4) advanceScene();
       }}
     >
       <HUDFrame sceneIndex={sceneIndex} mode="visitor">
@@ -160,9 +155,7 @@ export default function VisitorDisplayPage() {
           {!isGlitching && sceneIndex === 4 && (
             <VScene3b key="vscene3b" onAutoAdvance={() => updateState({ sceneIndex: 5 })} />
           )}
-          {!isGlitching && sceneIndex === 5 && <VScene4 key="vscene4a" showSubtext={false} />}
-          {!isGlitching && sceneIndex === 6 && <VScene4 key="vscene4b" showSubtext={true} />}
-          {!isGlitching && sceneIndex === 7 && <VScene5 key="vscene5" />}
+          {!isGlitching && sceneIndex >= 5 && <VScene4 key="vscene4" showSubtext={true} />}
         </AnimatePresence>
       </HUDFrame>
     </main>
