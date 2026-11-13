@@ -112,14 +112,14 @@ export default function VisitorDisplayPage() {
     const speedMultiplier = fastMode ? 0.65 : 1.0;
 
     if (sceneIndex === 1) {
-      // Perimeter alert: 3.5s in Fast Mode (6s standard)
-      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), fastMode ? 3500 : 6000);
+      // Perimeter alert: 2.5s in Fast Mode (6s standard)
+      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), fastMode ? 2500 : 6000);
     } else if (sceneIndex === 2) {
-      // Self-running Escalation: 7.5s in Fast Mode (12s standard)
-      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), fastMode ? 7500 : 12000);
+      // Self-running Escalation: 4.5s in Fast Mode (12s standard)
+      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), fastMode ? 4500 : 12000);
     } else if (sceneIndex === 3) {
-      // Identity scan: 6.0s in Fast Mode (10s standard)
-      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), fastMode ? 6000 : 10000);
+      // Identity scan: 4.0s in Fast Mode (10s standard)
+      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), fastMode ? 4000 : 10000);
     }
     // Scene 5 (VScene4) is the Grand Climax / Final Screen — holds indefinitely with zero distortion banner
 

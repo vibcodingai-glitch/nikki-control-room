@@ -79,7 +79,7 @@ export const VScene4: React.FC<SceneProps> = ({ showSubtext = true }) => {
     >
       {/* Full-Screen Motion-Drawing Photographic Banner (Zero Distortion, Edge-to-Edge) */}
       <MotionDrawingBanner 
-        speedMultiplier={fastMode ? 0.65 : 1.0}
+        speedMultiplier={fastMode ? 0.55 : 1.0}
         onFormComplete={handleBannerComplete}
       />
 

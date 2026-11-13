@@ -34,7 +34,7 @@ export const VScene3 = () => {
     // 1. Animate the 4 progress bars rapidly
     const start = Date.now();
     const durations = fastMode 
-      ? [700, 1100, 1500, 1900]
+      ? [450, 700, 950, 1200]
       : [1200, 1800, 2400, 3000]; // ms to complete each bar
 
     const progressInterval = setInterval(() => {
@@ -51,15 +51,15 @@ export const VScene3 = () => {
         })
       );
 
-      const maxDuration = fastMode ? 2000 : 3200;
+      const maxDuration = fastMode ? 1300 : 3200;
       if (elapsed > maxDuration) {
         clearInterval(progressInterval);
       }
-    }, 40);
+    }, 30);
 
-    // 2. Staged reveal of the Friendly Turn (6.0s max in Fast Mode, 10s in Standard)
+    // 2. Staged reveal of the Friendly Turn (4.0s max in Fast Mode, 10s in Standard)
     const timings = fastMode
-      ? [2100, 2700, 3300, 3900, 4600, 5300]
+      ? [1300, 1750, 2250, 2750, 3200, 3550]
       : [3400, 4500, 5700, 6900, 8000, 9000];
 
     const timers = timings.map((time, index) =>

@@ -19,8 +19,8 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
   const [countdown, setCountdown] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fast mode reduces initial delay (1.0s fast, 2.2s standard)
-    const initialDelay = state.fastMode ? 1000 : 2200;
+    // Fast mode reduces initial delay (0.55s fast, 2.2s standard)
+    const initialDelay = state.fastMode ? 550 : 2200;
     const t1 = setTimeout(() => {
       setCountdown(3);
     }, initialDelay);
@@ -33,14 +33,14 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
 
     if (countdown > 0) {
       // Increase tempo of alert-beep as countdown drops
-      if (countdown === 3) setBeepGap(600);
-      if (countdown === 2) setBeepGap(450);
+      if (countdown === 3) setBeepGap(500);
+      if (countdown === 2) setBeepGap(350);
       if (countdown === 1) {
-        setBeepGap(280);
+        setBeepGap(220);
         play("whoosh-transition");
       }
 
-      const stepInterval = state.fastMode ? 650 : 1000;
+      const stepInterval = state.fastMode ? 550 : 1000;
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
       }, stepInterval);
