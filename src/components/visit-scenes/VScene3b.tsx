@@ -19,8 +19,8 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
   const [countdown, setCountdown] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fast mode reduces initial delay
-    const initialDelay = state.fastMode ? 1400 : 2200;
+    // Fast mode reduces initial delay (1.0s fast, 2.2s standard)
+    const initialDelay = state.fastMode ? 1000 : 2200;
     const t1 = setTimeout(() => {
       setCountdown(3);
     }, initialDelay);

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TerminalScanBackground } from "@/components/TerminalScanBackground";
 import { HexDumpStream, NetworkPulse } from "@/components/TechEffects";
 import { visitorCopy } from "@/lib/visitorCopy";
+import { useVisitSyncState } from "@/lib/useVisitSyncState";
 
 interface ScanBarState {
   label: string;
@@ -14,6 +15,8 @@ interface ScanBarState {
 }
 
 export const VScene3 = () => {
+  const { state } = useVisitSyncState("display");
+  const { fastMode } = state;
   const [step, setStep] = useState(0);
 
   // Scan progress bars state
@@ -30,7 +33,9 @@ export const VScene3 = () => {
   useEffect(() => {
     // 1. Animate the 4 progress bars rapidly
     const start = Date.now();
-    const durations = [1200, 1800, 2400, 3000]; // ms to complete each bar
+    const durations = fastMode 
+      ? [700, 1100, 1500, 1900]
+      : [1200, 1800, 2400, 3000]; // ms to complete each bar
 
     const progressInterval = setInterval(() => {
       const elapsed = Date.now() - start;
@@ -46,20 +51,16 @@ export const VScene3 = () => {
         })
       );
 
-      if (elapsed > 3200) {
+      const maxDuration = fastMode ? 2000 : 3200;
+      if (elapsed > maxDuration) {
         clearInterval(progressInterval);
       }
-    }, 50);
+    }, 40);
 
-    // 2. Staged reveal of the Friendly Turn
-    const timings = [
-      3400, // Step 1: Affiliation
-      4500, // Step 2: Location
-      5700, // Step 3: Status: VIPs
-      6900, // Step 4: Purpose
-      8000, // Step 5: Host
-      9000, // Step 6: Friendliness Index 99% + Drain meter
-    ];
+    // 2. Staged reveal of the Friendly Turn (6.0s max in Fast Mode, 10s in Standard)
+    const timings = fastMode
+      ? [2100, 2700, 3300, 3900, 4600, 5300]
+      : [3400, 4500, 5700, 6900, 8000, 9000];
 
     const timers = timings.map((time, index) =>
       setTimeout(() => {
@@ -79,7 +80,7 @@ export const VScene3 = () => {
       clearInterval(progressInterval);
       timers.forEach((t) => clearTimeout(t));
     };
-  }, []);
+  }, [fastMode]);
 
   return (
     <motion.div 

@@ -18,7 +18,7 @@ export const MotionDrawingBanner: React.FC<MotionDrawingBannerProps> = ({
   const completedRef = useRef(false);
 
   useEffect(() => {
-    const durationMs = 2600 * speedMultiplier;
+    const durationMs = 2400 * speedMultiplier;
     const startTime = Date.now();
 
     const interval = setInterval(() => {

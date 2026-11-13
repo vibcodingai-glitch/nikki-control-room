@@ -184,7 +184,7 @@ export default function VisitAdminPage() {
                 <label className="flex items-center gap-2 cursor-pointer bg-black/60 px-2.5 py-1 rounded border border-gray-800 hover:border-gray-700">
                   <Zap size={14} className={fastMode ? "text-amber-400" : "text-gray-500"} />
                   <span className={`text-xs ${fastMode ? "text-amber-400 font-bold" : "text-gray-400"}`}>
-                    Fast Mode (~35% faster)
+                    Fast Mode (23s Max - Default)
                   </span>
                   <input
                     type="checkbox"

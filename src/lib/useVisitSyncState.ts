@@ -14,7 +14,7 @@ export type VisitState = {
 
 export const DEFAULT_VISIT_STATE: VisitState = {
   sceneIndex: 0,
-  fastMode: false,
+  fastMode: true,
   timeConfig: { useRealTime: true, simulatedTime: "12:00:00" },
   transitionTimings: { crossFadeMs: 1000, glitchCutMs: 200, countdownIntervalMs: 1000 },
   muted: false,
