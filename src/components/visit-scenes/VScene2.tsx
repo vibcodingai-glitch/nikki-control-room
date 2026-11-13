@@ -90,10 +90,6 @@ export const VScene2 = () => {
       setIsGlitching(true);
       const glitchTimeout = setTimeout(() => setIsGlitching(false), 140);
       timeouts.push(glitchTimeout);
-
-      if (isReady) {
-        playRef.current("flip-click");
-      }
     };
 
     // Transition to Stage B (2s)

@@ -12,6 +12,7 @@ interface SplitFlapProps {
   className?: string;
   staggerDelayMs?: number;
   mode?: "flap" | "decrypt";
+  sound?: boolean;
 }
 
 const CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*()_+{}[]|;:?,./ ";
@@ -24,7 +25,8 @@ export const SplitFlap: React.FC<SplitFlapProps> = ({
   flipSpeedMs = 50,
   className = "",
   staggerDelayMs = 40,
-  mode = "flap"
+  mode = "flap",
+  sound = false,
 }) => {
   const { play, isReady } = useAudio();
   const [displayedChars, setDisplayedChars] = useState<string[]>([]);
@@ -81,7 +83,7 @@ export const SplitFlap: React.FC<SplitFlapProps> = ({
             setIsComplete(true);
           }
 
-          if (isReady && targetChar !== " ") {
+          if (sound && isReady && targetChar !== " ") {
             play("flip-click");
           }
         } else {
@@ -90,7 +92,7 @@ export const SplitFlap: React.FC<SplitFlapProps> = ({
             next[index] = charsPool.charAt(Math.floor(Math.random() * charsPool.length));
             return next;
           });
-          if (isReady && flipCount % 2 === 0) {
+          if (sound && isReady && flipCount % 4 === 0) {
             play("flip-click");
           }
         }
@@ -102,7 +104,7 @@ export const SplitFlap: React.FC<SplitFlapProps> = ({
     return () => {
       timerRefs.current.forEach((t) => clearInterval(t));
     };
-  }, [text, isReady, flipSpeedMs, staggerDelayMs, play, mode]);
+  }, [text, isReady, flipSpeedMs, staggerDelayMs, play, mode, sound]);
 
   // Group characters into words to prevent breaking mid-word
   const wordGroups: { char: string; index: number }[][] = [];

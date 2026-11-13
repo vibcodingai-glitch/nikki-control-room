@@ -36,7 +36,7 @@ export const VScene4: React.FC<SceneProps> = ({ showSubtext = true }) => {
 
       // 4. Smoothly fade celebration music down to complete silence by the end
       const fadeTimer = setTimeout(() => {
-        fade("celebration-music", 0.7, 0, 4000);
+        fade("celebration-music", 0.35, 0, 4000);
       }, fastMode ? 3000 : 4500);
 
       // 5. Hard stop on audio once fade is complete to ensure 100% total silence

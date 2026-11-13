@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 const SCENE_NAMES = [
-  "0: Executive Welcome Idle",
+  "0: Dashboard Idle",
   "1: Perimeter Alert",
   "2: Self-Running Escalation",
   "3: Identity Scan",
@@ -243,7 +243,7 @@ export default function VisitAdminPage() {
                   : sceneIndex === 5
                   ? "Scene 5: Grand Climax — Motion-drawing banner formed with 4 VIPs identified."
                   : sceneIndex === 0 
-                  ? "Display is showing live Executive Welcome Banner with active clock & telemetry." 
+                  ? "Display is showing default Idle Delivery Signal Board." 
                   : "Automatic timed progression is active."}
               </p>
 

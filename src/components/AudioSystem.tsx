@@ -102,23 +102,24 @@ export const AudioSystemProvider = ({ children }: { children: React.ReactNode })
   const isBeeping = useRef(false);
   const beepGapRef = useRef(800);
   const beepTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFlipClickTime = useRef(0);
 
   const pathname = usePathname();
   const isVisit = pathname?.startsWith("/visit");
 
   useEffect(() => {
-    // Initialize all audio tracks
+    // Initialize all audio tracks with comfortable, reduced volumes (no ear-piercing peaks)
     howls.current = {
-      "ambient-hum": new Howl({ src: ["/audio/ambient-hum.wav"], loop: true, volume: 0.5 }),
-      "alert-detected-voice": new Howl({ src: ["/audio/alert-detected-voice.aiff"], volume: 0.8 }),
-      "alert-beep": new Howl({ src: ["/audio/alert-beep.wav"], volume: 0.6 }),
-      "flip-click": new Howl({ src: ["/audio/flip-click.wav"], volume: 0.2 }),
-      "whoosh-transition": new Howl({ src: ["/audio/whoosh-transition.wav"], volume: 0.9 }),
-      "celebration-horn": new Howl({ src: ["/audio/celebration-horn.wav"], volume: 1.0 }),
-      "celebration-music": new Howl({ src: ["/audio/celebration-music.wav"], loop: true, volume: 0.7 }),
+      "ambient-hum": new Howl({ src: ["/audio/ambient-hum.wav"], loop: true, volume: 0.2 }),
+      "alert-detected-voice": new Howl({ src: ["/audio/alert-detected-voice.aiff"], volume: 0.45 }),
+      "alert-beep": new Howl({ src: ["/audio/alert-beep.wav"], volume: 0.25 }),
+      "flip-click": new Howl({ src: ["/audio/flip-click.wav"], volume: 0.02 }),
+      "whoosh-transition": new Howl({ src: ["/audio/whoosh-transition.wav"], volume: 0.35 }),
+      "celebration-horn": new Howl({ src: ["/audio/celebration-horn.wav"], volume: 0.4 }),
+      "celebration-music": new Howl({ src: ["/audio/celebration-music.wav"], loop: true, volume: 0.35 }),
       "access-granted": new Howl({ 
         src: ["/audio/access-granted.wav"], 
-        volume: 0.9,
+        volume: 0.4,
         onloaderror: () => {
           // Gracefully handled in play() fallback
         }
@@ -165,7 +166,15 @@ export const AudioSystemProvider = ({ children }: { children: React.ReactNode })
     }
 
     if (howls.current[id]) {
-      // For flip-click, allow overlapping by not stopping previous
+      // For flip-click, throttle playback to avoid machine-gun ear fatigue
+      if (id === "flip-click") {
+        const now = Date.now();
+        if (now - lastFlipClickTime.current < 120) {
+          return;
+        }
+        lastFlipClickTime.current = now;
+      }
+
       if (id !== "flip-click") {
         if (!howls.current[id].playing()) {
           howls.current[id].play();
