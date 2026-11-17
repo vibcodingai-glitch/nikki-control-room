@@ -37,9 +37,12 @@ export default function VisitorDisplayPage() {
   }, [events, stop]);
 
   const advanceScene = useCallback(() => {
-    // 0: VScene0, 1: VScene1, 2: VScene2, 3: VScene3, 4: VScene3b, 5: VScene4 (Grand Finale)
-    if (sceneIndex < 5 && sceneIndex !== 4) {
-      updateState({ sceneIndex: sceneIndex + 1 });
+    // When on standby (Scene 0), advancing starts the 15-second cinematic experience
+    if (sceneIndex === 0) {
+      updateState({ sceneIndex: 1 });
+    } else if (sceneIndex >= 5) {
+      // If already on the final banner, restart back to standby
+      updateState({ sceneIndex: 0 });
     }
   }, [sceneIndex, updateState]);
 
@@ -136,7 +139,9 @@ export default function VisitorDisplayPage() {
     <main 
       className="w-full h-screen overflow-hidden bg-[var(--background)] text-white relative cursor-pointer selection:bg-transparent"
       onClick={() => {
-        if (sceneIndex >= 0 && sceneIndex < 5 && sceneIndex !== 4) advanceScene();
+        if (sceneIndex === 0 || sceneIndex >= 5) {
+          advanceScene();
+        }
       }}
     >
       <HUDFrame sceneIndex={sceneIndex} mode="visitor">
@@ -150,7 +155,7 @@ export default function VisitorDisplayPage() {
         )}
 
         <AnimatePresence mode="wait">
-          {!isGlitching && sceneIndex === 0 && <VScene0 key="vscene0" />}
+          {!isGlitching && sceneIndex === 0 && <VScene0 key="vscene0" timeConfig={timeConfig} />}
           {!isGlitching && sceneIndex === 1 && <VScene1 key="vscene1" />}
           {!isGlitching && sceneIndex === 2 && <VScene2 key="vscene2" />}
           {!isGlitching && sceneIndex === 3 && <VScene3 key="vscene3" />}

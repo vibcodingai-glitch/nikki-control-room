@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAudio } from "@/components/AudioSystem";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { useVisitSyncState } from "@/lib/useVisitSyncState";
 import { visitorCopy } from "@/lib/visitorCopy";
 import { MotionDrawingBanner } from "@/components/visit-scenes/MotionDrawingBanner";
 
@@ -14,8 +13,7 @@ interface SceneProps {
 
 export const VScene4: React.FC<SceneProps> = ({ showSubtext = true }) => {
   const { play, stop, fade, isReady } = useAudio();
-  const { state } = useVisitSyncState("display");
-  const { fastMode } = state;
+  const fastMode = true;
   const audioTriggered = useRef(false);
   const [bannerFormed, setBannerFormed] = useState(false);
 

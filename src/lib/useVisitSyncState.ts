@@ -33,6 +33,10 @@ export function useVisitSyncState(role: "admin" | "display") {
         if (saved) {
           const parsed = JSON.parse(saved);
           parsed.fastMode = true;
+          // When the display screen loads, it should always start on Scene 0 (Idle Delivery Signal Board)
+          if (role === "display") {
+            parsed.sceneIndex = 0;
+          }
           return { ...DEFAULT_VISIT_STATE, ...parsed, fastMode: true };
         }
       } catch {
@@ -54,6 +58,20 @@ export function useVisitSyncState(role: "admin" | "display") {
     if (typeof window === "undefined") return;
 
     lastPongRef.current = Date.now();
+
+    // Ensure localStorage is persisted and display role defaults to Scene 0
+    try {
+      const current = localStorage.getItem(STORAGE_KEY);
+      if (!current) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_VISIT_STATE));
+      } else if (role === "display") {
+        const parsed = JSON.parse(current);
+        if (parsed.sceneIndex !== 0) {
+          parsed.sceneIndex = 0;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        }
+      }
+    } catch {}
 
     // Setup BroadcastChannel
     try {

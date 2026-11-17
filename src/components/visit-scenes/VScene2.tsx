@@ -5,7 +5,6 @@ import { SplitFlap } from "@/components/SplitFlap";
 import { motion, AnimatePresence } from "framer-motion";
 import { TerminalScanBackground } from "@/components/TerminalScanBackground";
 import { HexDumpStream, NetworkPulse, TypingLog } from "@/components/TechEffects";
-import { useVisitSyncState } from "@/lib/useVisitSyncState";
 import { ESCALATION_STAGES, EscalationStageConfig, visitorCopy } from "@/lib/visitorCopy";
 import { useAudio } from "@/components/AudioSystem";
 
@@ -34,8 +33,7 @@ const ALL_BLIPS = BLIP_CONFIGS.map((b) => {
 
 export const VScene2 = () => {
   const { play, setBeepGap, volume, isReady } = useAudio();
-  const { state } = useVisitSyncState("display");
-  const fastMode = state.fastMode;
+  const fastMode = true;
 
   // Track current stage: 0 = A, 1 = B, 2 = C, 3 = D, 4 = E
   const [stageIndex, setStageIndex] = useState(0);

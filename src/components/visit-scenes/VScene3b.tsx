@@ -6,7 +6,6 @@ import { useAudio } from "@/components/AudioSystem";
 import { motion } from "framer-motion";
 import { TerminalScanBackground } from "@/components/TerminalScanBackground";
 import { HexDumpStream, NetworkPulse } from "@/components/TechEffects";
-import { useVisitSyncState } from "@/lib/useVisitSyncState";
 import { visitorCopy } from "@/lib/visitorCopy";
 
 interface SceneProps {
@@ -15,7 +14,6 @@ interface SceneProps {
 
 export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
   const { play, setBeepGap } = useAudio();
-  const { state } = useVisitSyncState("display");
   const [countdown, setCountdown] = useState<number | null>(null);
 
   const onAutoAdvanceRef = useRef(onAutoAdvance);

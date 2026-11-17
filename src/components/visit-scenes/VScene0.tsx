@@ -4,11 +4,14 @@ import React from "react";
 import { motion } from "framer-motion";
 import { LiveDashboard } from "@/components/LiveDashboard";
 import { HexDumpStream } from "@/components/TechEffects";
-import { useVisitSyncState } from "@/lib/useVisitSyncState";
 
-export const VScene0 = () => {
-  const { state } = useVisitSyncState("display");
+interface VScene0Props {
+  timeConfig?: { useRealTime: boolean; simulatedTime: string };
+}
 
+export const VScene0: React.FC<VScene0Props> = ({ 
+  timeConfig = { useRealTime: true, simulatedTime: "12:00:00" } 
+}) => {
   return (
     <motion.div 
       className="w-full h-screen flex flex-col relative overflow-hidden bg-[var(--background)]"
@@ -23,7 +26,7 @@ export const VScene0 = () => {
       </div>
       
       <div className="relative z-10 w-full h-full">
-        <LiveDashboard timeConfig={state.timeConfig} />
+        <LiveDashboard timeConfig={timeConfig} />
       </div>
     </motion.div>
   );

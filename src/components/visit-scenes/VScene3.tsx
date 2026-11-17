@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TerminalScanBackground } from "@/components/TerminalScanBackground";
 import { HexDumpStream, NetworkPulse } from "@/components/TechEffects";
 import { visitorCopy } from "@/lib/visitorCopy";
-import { useVisitSyncState } from "@/lib/useVisitSyncState";
 
 interface ScanBarState {
   label: string;
@@ -15,8 +14,7 @@ interface ScanBarState {
 }
 
 export const VScene3 = () => {
-  const { state } = useVisitSyncState("display");
-  const { fastMode } = state;
+  const fastMode = true;
   const [step, setStep] = useState(0);
 
   // Scan progress bars state
