@@ -106,20 +106,22 @@ export default function VisitorDisplayPage() {
     return () => clearInterval(interval);
   }, [autoTriggerConfig, sceneIndex, timeConfig, updateState]);
 
-  // Automatic Scene Progression with optional Fast Mode (~35% shorter)
+  // Automatic Scene Progression (calibrated to 15s total wall-clock time)
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    const speedMultiplier = fastMode ? 0.65 : 1.0;
 
     if (sceneIndex === 1) {
-      // Perimeter alert: 2.5s in Fast Mode (6s standard)
-      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), fastMode ? 2500 : 6000);
+      // Perimeter alert: 1.8s
+      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), 1800);
     } else if (sceneIndex === 2) {
-      // Self-running Escalation: 4.5s in Fast Mode (12s standard)
-      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), fastMode ? 4500 : 12000);
+      // Self-running Escalation: 3.5s
+      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), 3500);
     } else if (sceneIndex === 3) {
-      // Identity scan: 4.0s in Fast Mode (10s standard)
-      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), fastMode ? 4000 : 10000);
+      // Identity scan: 3.0s
+      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), 3000);
+    } else if (sceneIndex === 4) {
+      // Countdown: 2.0s
+      timeout = setTimeout(() => updateState({ sceneIndex: 5 }), 2000);
     }
     // Scene 5 (VScene4) is the Grand Climax / Final Screen — holds indefinitely with zero distortion banner
 

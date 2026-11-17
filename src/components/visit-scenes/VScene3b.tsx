@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { SplitFlap } from "@/components/SplitFlap";
 import { useAudio } from "@/components/AudioSystem";
 import { motion } from "framer-motion";
@@ -18,40 +18,47 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
   const { state } = useVisitSyncState("display");
   const [countdown, setCountdown] = useState<number | null>(null);
 
+  const onAutoAdvanceRef = useRef(onAutoAdvance);
+  onAutoAdvanceRef.current = onAutoAdvance;
+
+  const playRef = useRef(play);
+  playRef.current = play;
+
+  const setBeepGapRef = useRef(setBeepGap);
+  setBeepGapRef.current = setBeepGap;
+
   useEffect(() => {
-    // Fast mode reduces initial delay (0.55s fast, 2.2s standard)
-    const initialDelay = state.fastMode ? 550 : 2200;
+    // Initial delay before countdown starts (0.4s)
+    const initialDelay = 400;
     const t1 = setTimeout(() => {
       setCountdown(3);
     }, initialDelay);
 
     return () => clearTimeout(t1);
-  }, [state.fastMode]);
+  }, []);
 
   useEffect(() => {
     if (countdown === null) return;
 
     if (countdown > 0) {
       // Increase tempo of alert-beep as countdown drops
-      if (countdown === 3) setBeepGap(500);
-      if (countdown === 2) setBeepGap(350);
+      if (countdown === 3) setBeepGapRef.current(450);
+      if (countdown === 2) setBeepGapRef.current(300);
       if (countdown === 1) {
-        setBeepGap(220);
-        play("whoosh-transition");
+        setBeepGapRef.current(200);
+        playRef.current("whoosh-transition");
       }
 
-      const stepInterval = state.fastMode ? 550 : 1000;
+      const stepInterval = 450;
       const timer = setTimeout(() => {
-        setCountdown(countdown - 1);
+        setCountdown((c) => (c !== null ? c - 1 : null));
       }, stepInterval);
 
       return () => clearTimeout(timer);
     } else if (countdown === 0) {
-      if (onAutoAdvance) {
-        onAutoAdvance();
-      }
+      onAutoAdvanceRef.current?.();
     }
-  }, [countdown, play, setBeepGap, onAutoAdvance, state.fastMode]);
+  }, [countdown]);
 
   const reclassifyText = visitorCopy.countdown.reclassifyHeader;
 

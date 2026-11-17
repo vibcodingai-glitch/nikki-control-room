@@ -55,8 +55,8 @@ export const VScene2 = () => {
   const volumeRef = useRef(volume);
   volumeRef.current = volume;
 
-  // Timings scale for fast mode (4.5s in Fast Mode, 12s in Standard Mode)
-  const scale = fastMode ? 0.375 : 1.0;
+  // Timings scale (calibrated to 4.5s for the 15s total experience)
+  const scale = 0.375;
 
   // Main Self-Running Escalation Timeline (12s total; ~7.8s in Fast Mode)
   useEffect(() => {

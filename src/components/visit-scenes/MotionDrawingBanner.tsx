@@ -18,7 +18,8 @@ export const MotionDrawingBanner: React.FC<MotionDrawingBannerProps> = ({
   const completedRef = useRef(false);
 
   useEffect(() => {
-    const durationMs = 2400 * speedMultiplier;
+    // 1.4s razor laser sweep across full screen
+    const durationMs = 1400;
     const startTime = Date.now();
 
     const interval = setInterval(() => {

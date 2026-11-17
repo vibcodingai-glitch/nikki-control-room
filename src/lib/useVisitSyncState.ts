@@ -32,10 +32,8 @@ export function useVisitSyncState(role: "admin" | "display") {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (role === "display") {
-            parsed.sceneIndex = 0;
-          }
-          return { ...DEFAULT_VISIT_STATE, ...parsed };
+          parsed.fastMode = true;
+          return { ...DEFAULT_VISIT_STATE, ...parsed, fastMode: true };
         }
       } catch {
         // fallback to default
