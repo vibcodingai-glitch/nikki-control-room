@@ -9,11 +9,11 @@ import { MotionDrawingBanner } from "@/components/visit-scenes/MotionDrawingBann
 
 interface SceneProps {
   showSubtext?: boolean;
+  fastMode?: boolean;
 }
 
-export const VScene4: React.FC<SceneProps> = ({ showSubtext = true }) => {
+export const VScene4: React.FC<SceneProps> = ({ showSubtext = true, fastMode = true }) => {
   const { play, stop, fade, isReady } = useAudio();
-  const fastMode = true;
   const audioTriggered = useRef(false);
   const [bannerFormed, setBannerFormed] = useState(false);
 
@@ -34,14 +34,14 @@ export const VScene4: React.FC<SceneProps> = ({ showSubtext = true }) => {
 
       // 4. Smoothly fade celebration music down to complete silence by the end
       const fadeTimer = setTimeout(() => {
-        fade("celebration-music", 0.35, 0, 3000);
-      }, 2000);
+        fade("celebration-music", 0.35, 0, fastMode ? 3000 : 4000);
+      }, fastMode ? 2000 : 4500);
 
       // 5. Hard stop on audio once fade is complete to ensure 100% total silence
       const stopAllTimer = setTimeout(() => {
         stop("celebration-music");
         stop("ambient-hum");
-      }, 5200);
+      }, fastMode ? 5200 : 8800);
 
       return () => {
         clearTimeout(musicTimer);

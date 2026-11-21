@@ -16,7 +16,8 @@ import {
   Play, 
   Square,
   Zap,
-  RotateCcw
+  RotateCcw,
+  Film
 } from "lucide-react";
 
 const SCENE_NAMES = [
@@ -181,46 +182,108 @@ export default function VisitAdminPage() {
         {/* TOP ROW: CINEMATIC LAUNCH & SEQUENCE MONITOR */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* QUICK LAUNCH & FAST MODE (7 cols) */}
+          {/* QUICK LAUNCH & EXPERIENCE MODE (7 cols) */}
           <section className="lg:col-span-7 bg-gradient-to-br from-red-950/40 via-red-900/20 to-black border-2 border-red-500/40 rounded-xl p-6 shadow-xl flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] text-red-400 uppercase tracking-[0.25em] font-bold">
                   Cinematic Launch
                 </span>
                 
-                {/* Fast Mode Toggle */}
-                <label className="flex items-center gap-2 cursor-pointer bg-black/60 px-2.5 py-1 rounded border border-gray-800 hover:border-gray-700">
-                  <Zap size={14} className={fastMode ? "text-amber-400" : "text-gray-500"} />
-                  <span className={`text-xs ${fastMode ? "text-amber-400 font-bold" : "text-gray-400"}`}>
-                    Fast Mode (15s Climax - Default)
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={fastMode}
-                    onChange={(e) => updateState({ fastMode: e.target.checked })}
-                    className="accent-amber-400"
-                  />
-                </label>
+                <span className="text-[11px] font-mono text-gray-400">
+                  Target: <strong className={fastMode ? "text-amber-400" : "text-cyan-400"}>
+                    {fastMode ? "~15 Seconds" : "~38 Seconds"}
+                  </strong>
+                </span>
               </div>
 
-              <div className="text-xl text-white font-bold">Launch Visitor Experience</div>
-              <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
-                Triggers Scene 1 (Perimeter Alert), followed by the self-running headcount escalation (01 → 02 → 03 → 04..09 → ??), organizational affiliation scan, countdown, and the grand reveal: <strong className="text-emerald-400">WELCOME TO OUR CONTROL ROOM</strong>.
+              {/* DUAL MODE SELECTOR BUTTONS */}
+              <div className="grid grid-cols-2 gap-2 mb-4 bg-black/60 p-1.5 rounded-lg border border-gray-800">
+                <button
+                  type="button"
+                  onClick={() => updateState({ fastMode: true })}
+                  className={`py-2 px-3 rounded-md text-xs font-mono font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                    fastMode
+                      ? "bg-amber-500/25 text-amber-300 border border-amber-500/60 shadow-lg shadow-amber-500/10"
+                      : "text-gray-400 hover:text-white border border-transparent"
+                  }`}
+                >
+                  <Zap size={15} /> 15s Fast Mode
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateState({ fastMode: false })}
+                  className={`py-2 px-3 rounded-md text-xs font-mono font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                    !fastMode
+                      ? "bg-cyan-500/25 text-cyan-300 border border-cyan-500/60 shadow-lg shadow-cyan-500/10"
+                      : "text-gray-400 hover:text-white border border-transparent"
+                  }`}
+                >
+                  <Film size={15} /> 38s Full Cinematic
+                </button>
+              </div>
+
+              <div className="text-xl text-white font-bold flex items-center gap-2">
+                <span>Launch Experience</span>
+                <span className={`text-xs px-2 py-0.5 rounded font-mono font-bold uppercase ${
+                  fastMode ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
+                }`}>
+                  {fastMode ? "15s Mode" : "38s Mode"}
+                </span>
+              </div>
+
+              <p className="text-xs text-gray-400 mt-1.5 leading-relaxed font-mono">
+                {fastMode 
+                  ? "⚡ Rapid executive pacing (~15s total): quick perimeter alert (1.8s), accelerated headcount escalation (3.5s), instant identity match (3s), and rapid 3-2-1 countdown into the grand reveal."
+                  : "🎬 Full dramatic buildup (~38s total): deep tension escalation across Stages A-E (12s), thorough multi-factor facial and badge scanning (10s), and deliberate countdown into the grand reveal."}
               </p>
             </div>
 
-            <div className="mt-5">
+            <div className="mt-5 space-y-2">
               <button
                 onClick={() => {
                   handleSceneChange(1);
-                  setLaunchFeedback("✅ LAUNCHED! Visitor sequence triggered");
-                  setTimeout(() => setLaunchFeedback(null), 3000);
+                  setLaunchFeedback(`✅ LAUNCHED! ${fastMode ? "15s Fast" : "38s Full Cinematic"} sequence triggered`);
+                  setTimeout(() => setLaunchFeedback(null), 3500);
                 }}
-                className="w-full py-4 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-black text-lg uppercase tracking-widest rounded-lg shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-3 cursor-pointer"
+                className={`w-full py-4 text-white font-black text-lg uppercase tracking-widest rounded-lg shadow-lg transition flex items-center justify-center gap-3 cursor-pointer ${
+                  fastMode 
+                    ? "bg-red-600 hover:bg-red-500 active:bg-red-700 shadow-red-600/30" 
+                    : "bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 shadow-cyan-600/30"
+                }`}
               >
-                <AlertTriangle size={22} /> LAUNCH VISITOR EXPERIENCE NOW
+                <AlertTriangle size={22} />
+                {fastMode ? "LAUNCH 15s FAST SEQUENCE NOW" : "LAUNCH 38s CINEMATIC SEQUENCE NOW"}
               </button>
+
+              {/* QUICK DIRECT LAUNCH CHIPS */}
+              <div className="flex items-center justify-between gap-2 pt-1 text-[11px] font-mono text-gray-400">
+                <span>Direct 1-tap Launch:</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateState({ fastMode: true, sceneIndex: 1 });
+                      setLaunchFeedback("✅ LAUNCHED! 15s Fast Mode triggered");
+                      setTimeout(() => setLaunchFeedback(null), 3500);
+                    }}
+                    className="px-2.5 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <Zap size={12} /> Launch 15s
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateState({ fastMode: false, sceneIndex: 1 });
+                      setLaunchFeedback("✅ LAUNCHED! 38s Full Cinematic triggered");
+                      setTimeout(() => setLaunchFeedback(null), 3500);
+                    }}
+                    className="px-2.5 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition flex items-center gap-1 cursor-pointer"
+                  >
+                    <Film size={12} /> Launch 38s
+                  </button>
+                </div>
+              </div>
 
               {launchFeedback && (
                 <div className="mt-2 text-center text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded animate-pulse">
@@ -237,9 +300,18 @@ export default function VisitAdminPage() {
                 <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
                   Sequence Status
                 </span>
-                <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">
-                  {sceneIndex === 0 ? "STANDBY" : `IN PROGRESS (SCENE ${sceneIndex})`}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                    fastMode 
+                      ? "bg-amber-500/10 text-amber-400 border-amber-500/30" 
+                      : "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                  }`}>
+                    {fastMode ? "⚡ 15s MODE" : "🎬 38s MODE"}
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                    {sceneIndex === 0 ? "STANDBY" : `IN PROGRESS (SCENE ${sceneIndex})`}
+                  </span>
+                </div>
               </div>
 
               <div className="text-2xl font-black text-white font-mono truncate">

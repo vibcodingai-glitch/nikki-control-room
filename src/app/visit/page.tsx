@@ -109,22 +109,35 @@ export default function VisitorDisplayPage() {
     return () => clearInterval(interval);
   }, [autoTriggerConfig, sceneIndex, timeConfig, updateState]);
 
-  // Automatic Scene Progression (calibrated to 15s total wall-clock time)
+  // Listen for query params e.g. /visit?mode=full or /visit?mode=fast
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get("mode");
+      if (mode === "full" || mode === "standard" || mode === "38s" || mode === "40s" || mode === "slow") {
+        updateState({ fastMode: false });
+      } else if (mode === "fast" || mode === "15s") {
+        updateState({ fastMode: true });
+      }
+    }
+  }, [updateState]);
+
+  // Automatic Scene Progression (calibrated for 15s Fast Mode or 38s Full Cinematic Mode)
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
     if (sceneIndex === 1) {
-      // Perimeter alert: 1.8s
-      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), 1800);
+      // Perimeter alert: 1.8s (Fast) or 5.8s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), fastMode ? 1800 : 5800);
     } else if (sceneIndex === 2) {
-      // Self-running Escalation: 3.5s
-      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), 3500);
+      // Self-running Escalation: 3.5s (Fast) or 11.5s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), fastMode ? 3500 : 11500);
     } else if (sceneIndex === 3) {
-      // Identity scan: 3.0s
-      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), 3000);
+      // Identity scan: 3.0s (Fast) or 9.5s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), fastMode ? 3000 : 9500);
     } else if (sceneIndex === 4) {
-      // Countdown: 2.0s
-      timeout = setTimeout(() => updateState({ sceneIndex: 5 }), 2000);
+      // Countdown: 2.0s (Fast) or 4.8s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 5 }), fastMode ? 2000 : 4800);
     }
     // Scene 5 (VScene4) is the Grand Climax / Final Screen — holds indefinitely with zero distortion banner
 
@@ -145,6 +158,36 @@ export default function VisitorDisplayPage() {
       }}
     >
       <HUDFrame sceneIndex={sceneIndex} mode="visitor">
+        {/* Standby Mode Switcher (visible on Scene 0 so presenters can pick 15s or 38s before launch) */}
+        {sceneIndex === 0 && (
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-black/80 border border-gray-800/80 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-2xl pointer-events-auto"
+          >
+            <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider mr-1">Experience Mode:</span>
+            <button
+              onClick={() => updateState({ fastMode: true })}
+              className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                fastMode
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-sm shadow-amber-500/20"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <span>⚡</span> 15s Fast
+            </button>
+            <button
+              onClick={() => updateState({ fastMode: false })}
+              className={`px-3 py-1 rounded-full text-xs font-mono font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                !fastMode
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm shadow-cyan-500/20"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <span>🎬</span> 38s Full Cinematic
+            </button>
+          </div>
+        )}
+
         {/* Glitch Cut Overlay */}
         {isGlitching && (
           <div className="absolute inset-0 z-50 pointer-events-none">
@@ -156,13 +199,17 @@ export default function VisitorDisplayPage() {
 
         <AnimatePresence mode="wait">
           {!isGlitching && sceneIndex === 0 && <VScene0 key="vscene0" timeConfig={timeConfig} />}
-          {!isGlitching && sceneIndex === 1 && <VScene1 key="vscene1" />}
-          {!isGlitching && sceneIndex === 2 && <VScene2 key="vscene2" />}
-          {!isGlitching && sceneIndex === 3 && <VScene3 key="vscene3" />}
+          {!isGlitching && sceneIndex === 1 && <VScene1 key="vscene1" fastMode={fastMode} />}
+          {!isGlitching && sceneIndex === 2 && <VScene2 key="vscene2" fastMode={fastMode} />}
+          {!isGlitching && sceneIndex === 3 && <VScene3 key="vscene3" fastMode={fastMode} />}
           {!isGlitching && sceneIndex === 4 && (
-            <VScene3b key="vscene3b" onAutoAdvance={() => updateState({ sceneIndex: 5 })} />
+            <VScene3b 
+              key="vscene3b" 
+              fastMode={fastMode} 
+              onAutoAdvance={() => updateState({ sceneIndex: 5 })} 
+            />
           )}
-          {!isGlitching && sceneIndex >= 5 && <VScene4 key="vscene4" showSubtext={true} />}
+          {!isGlitching && sceneIndex >= 5 && <VScene4 key="vscene4" fastMode={fastMode} showSubtext={true} />}
         </AnimatePresence>
       </HUDFrame>
     </main>

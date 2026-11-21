@@ -31,9 +31,8 @@ const ALL_BLIPS = BLIP_CONFIGS.map((b) => {
   return { ...b, x, y };
 });
 
-export const VScene2 = () => {
+export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
   const { play, setBeepGap, volume, isReady } = useAudio();
-  const fastMode = true;
 
   // Track current stage: 0 = A, 1 = B, 2 = C, 3 = D, 4 = E
   const [stageIndex, setStageIndex] = useState(0);
@@ -53,8 +52,8 @@ export const VScene2 = () => {
   const volumeRef = useRef(volume);
   volumeRef.current = volume;
 
-  // Timings scale (calibrated to 4.5s for the 15s total experience)
-  const scale = 0.375;
+  // Timings scale (0.375 for 15s Fast Mode, 1.0 for 38s Standard Mode)
+  const scale = fastMode ? 0.375 : 1.0;
 
   // Main Self-Running Escalation Timeline (12s total; ~7.8s in Fast Mode)
   useEffect(() => {

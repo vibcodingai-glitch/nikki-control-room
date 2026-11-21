@@ -8,7 +8,7 @@ import { TerminalScanBackground } from "@/components/TerminalScanBackground";
 import { HexDumpStream, NetworkPulse, TypingLog } from "@/components/TechEffects";
 import { visitorCopy } from "@/lib/visitorCopy";
 
-export const VScene1 = () => {
+export const VScene1 = ({ fastMode = true }: { fastMode?: boolean }) => {
   const { play, stop, isReady } = useAudio();
   const [showSubText, setShowSubText] = useState(false);
 
@@ -22,7 +22,7 @@ export const VScene1 = () => {
 
       const textTimer = setTimeout(() => {
         setShowSubText(true);
-      }, 1800);
+      }, fastMode ? 1400 : 2500);
 
       return () => {
         clearTimeout(voiceTimer);
@@ -30,7 +30,7 @@ export const VScene1 = () => {
         stop("alert-detected-voice");
       };
     }
-  }, [isReady, play, stop]);
+  }, [isReady, play, stop, fastMode]);
 
   return (
     <motion.div 

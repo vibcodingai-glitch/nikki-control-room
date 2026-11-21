@@ -10,9 +10,10 @@ import { visitorCopy } from "@/lib/visitorCopy";
 
 interface SceneProps {
   onAutoAdvance?: () => void;
+  fastMode?: boolean;
 }
 
-export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
+export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance, fastMode = true }) => {
   const { play, setBeepGap } = useAudio();
   const [countdown, setCountdown] = useState<number | null>(null);
 
@@ -26,28 +27,28 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
   setBeepGapRef.current = setBeepGap;
 
   useEffect(() => {
-    // Initial delay before countdown starts (0.4s)
-    const initialDelay = 400;
+    // Initial delay before countdown starts (0.4s in Fast, 1.6s in Standard)
+    const initialDelay = fastMode ? 400 : 1600;
     const t1 = setTimeout(() => {
       setCountdown(3);
     }, initialDelay);
 
     return () => clearTimeout(t1);
-  }, []);
+  }, [fastMode]);
 
   useEffect(() => {
     if (countdown === null) return;
 
     if (countdown > 0) {
       // Increase tempo of alert-beep as countdown drops
-      if (countdown === 3) setBeepGapRef.current(450);
-      if (countdown === 2) setBeepGapRef.current(300);
+      if (countdown === 3) setBeepGapRef.current(fastMode ? 450 : 800);
+      if (countdown === 2) setBeepGapRef.current(fastMode ? 300 : 500);
       if (countdown === 1) {
-        setBeepGapRef.current(200);
+        setBeepGapRef.current(fastMode ? 200 : 300);
         playRef.current("whoosh-transition");
       }
 
-      const stepInterval = 450;
+      const stepInterval = fastMode ? 450 : 950;
       const timer = setTimeout(() => {
         setCountdown((c) => (c !== null ? c - 1 : null));
       }, stepInterval);
@@ -56,7 +57,7 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance }) => {
     } else if (countdown === 0) {
       onAutoAdvanceRef.current?.();
     }
-  }, [countdown]);
+  }, [countdown, fastMode]);
 
   const reclassifyText = visitorCopy.countdown.reclassifyHeader;
 

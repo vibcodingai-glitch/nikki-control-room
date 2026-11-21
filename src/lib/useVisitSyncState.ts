@@ -32,12 +32,12 @@ export function useVisitSyncState(role: "admin" | "display") {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          parsed.fastMode = true;
+          const fastMode = typeof parsed.fastMode === "boolean" ? parsed.fastMode : true;
           // When the display screen loads, it should always start on Scene 0 (Idle Delivery Signal Board)
           if (role === "display") {
             parsed.sceneIndex = 0;
           }
-          return { ...DEFAULT_VISIT_STATE, ...parsed, fastMode: true };
+          return { ...DEFAULT_VISIT_STATE, ...parsed, fastMode };
         }
       } catch {
         // fallback to default

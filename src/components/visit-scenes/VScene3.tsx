@@ -13,8 +13,7 @@ interface ScanBarState {
   completed: boolean;
 }
 
-export const VScene3 = () => {
-  const fastMode = true;
+export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
   const [step, setStep] = useState(0);
 
   // Scan progress bars state
@@ -29,9 +28,13 @@ export const VScene3 = () => {
   const [threatDrain, setThreatDrain] = useState(85);
 
   useEffect(() => {
-    // 1. Animate the 4 progress bars rapidly
+    // 1. Animate the 4 progress bars
     const start = Date.now();
-    const durations = [450, 700, 950, 1200]; // ms to complete each bar
+    const durations = fastMode 
+      ? [450, 700, 950, 1200]
+      : [1200, 1800, 2400, 3000];
+
+    const maxProgressDuration = fastMode ? 1300 : 3200;
 
     const progressInterval = setInterval(() => {
       const elapsed = Date.now() - start;
@@ -47,13 +50,15 @@ export const VScene3 = () => {
         })
       );
 
-      if (elapsed > 1300) {
+      if (elapsed > maxProgressDuration) {
         clearInterval(progressInterval);
       }
     }, 30);
 
-    // 2. Staged reveal of the Friendly Turn (calibrated to 2.8s total)
-    const timings = [1100, 1450, 1800, 2150, 2500, 2800];
+    // 2. Staged reveal of the Friendly Turn (2.8s in Fast, 9.2s in Standard 38s)
+    const timings = fastMode
+      ? [1100, 1450, 1800, 2150, 2500, 2800]
+      : [3200, 4400, 5600, 6800, 8000, 9200];
 
     const timers = timings.map((time, index) =>
       setTimeout(() => {
