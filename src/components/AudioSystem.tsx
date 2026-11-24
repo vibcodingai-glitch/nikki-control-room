@@ -112,7 +112,7 @@ export const AudioSystemProvider = ({ children }: { children: React.ReactNode })
     howls.current = {
       "ambient-hum": new Howl({ src: ["/audio/ambient-hum.wav"], loop: true, volume: 0.2 }),
       "alert-detected-voice": new Howl({ src: ["/audio/alert-detected-voice.aiff"], volume: 0.45 }),
-      "alert-beep": new Howl({ src: ["/audio/alert-beep.wav"], volume: 0.18 }),
+      "alert-beep": new Howl({ src: ["/audio/alert-beep.wav"], volume: 0.32 }),
       "flip-click": new Howl({ src: ["/audio/flip-click.wav"], volume: 0.02 }),
       "whoosh-transition": new Howl({ src: ["/audio/whoosh-transition.wav"], volume: 0.35 }),
       "celebration-horn": new Howl({ src: ["/audio/celebration-horn.wav"], volume: 0.4 }),

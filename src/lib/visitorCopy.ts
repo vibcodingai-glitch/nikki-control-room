@@ -32,7 +32,7 @@ export const ESCALATION_STAGES: EscalationStageConfig[] = [
     blipCount: 1,
     radarLabel: "RADAR BLIPS: 1 / 1",
     beepGap: 900,
-    beepVolume: 0.10,
+    beepVolume: 0.22,
   },
   {
     id: "B",
@@ -46,7 +46,7 @@ export const ESCALATION_STAGES: EscalationStageConfig[] = [
     blipCount: 2,
     radarLabel: "RADAR BLIPS: 2 / 2",
     beepGap: 700,
-    beepVolume: 0.14,
+    beepVolume: 0.28,
   },
   {
     id: "C",
@@ -60,7 +60,7 @@ export const ESCALATION_STAGES: EscalationStageConfig[] = [
     blipCount: 4,
     radarLabel: "RADAR BLIPS: 4",
     beepGap: 480,
-    beepVolume: 0.18,
+    beepVolume: 0.36,
   },
   {
     id: "D",
@@ -74,7 +74,7 @@ export const ESCALATION_STAGES: EscalationStageConfig[] = [
     blipCount: 12,
     radarLabel: "RADAR BLIPS: ???",
     beepGap: 300,
-    beepVolume: 0.22,
+    beepVolume: 0.44,
   },
   {
     id: "E",
@@ -88,7 +88,7 @@ export const ESCALATION_STAGES: EscalationStageConfig[] = [
     blipCount: 12,
     radarLabel: "RADAR BLIPS: ???",
     beepGap: 180,
-    beepVolume: 0.26,
+    beepVolume: 0.52,
   },
 ];
 
