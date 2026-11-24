@@ -162,7 +162,7 @@ export default function VisitorDisplayPage() {
         {sceneIndex === 0 && (
           <div 
             onClick={(e) => e.stopPropagation()} 
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-black/80 border border-gray-800/80 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-2xl pointer-events-auto"
+            className="absolute bottom-8 right-8 z-40 flex items-center gap-2 bg-black/80 border border-gray-800/80 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-2xl pointer-events-auto"
           >
             <span className="text-[10px] text-gray-500 font-mono uppercase tracking-wider mr-1">Experience Mode:</span>
             <button

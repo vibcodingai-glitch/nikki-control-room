@@ -362,8 +362,9 @@ export const LiveDashboard = ({
             <span>GROWTH</span>
             <span>SPEED</span>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold tracking-[0.2em] ml-4 text-white uppercase">
-            CWAR DELIVERY EVENT SIGNAL BOARD
+          <h1 className="text-sm md:text-base lg:text-lg font-bold tracking-wider ml-4 text-white uppercase max-w-[280px] md:max-w-sm leading-tight">
+            <span>CWAR DELIVERY EVENT</span>
+            <span className="block text-gray-300">SIGNAL BOARD</span>
           </h1>
           <div className="ml-8 flex gap-2">
             <button className="px-3 py-1 bg-[#161B22] rounded text-gray-400 border border-gray-700/50 hover:bg-gray-800 transition flex items-center gap-2">

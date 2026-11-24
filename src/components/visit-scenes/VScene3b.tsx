@@ -80,26 +80,37 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance, fastMode = true 
         <NetworkPulse color="#D63C2C" size={600} />
       </div>
 
-      <div className="flex flex-col items-center gap-12 z-10 px-4 text-center">
-        {/* Reclassifying N entities text */}
-        <SplitFlap 
-          text={reclassifyText} 
-          fontSize="text-xl md:text-3xl lg:text-4xl" 
-          color="text-[var(--color-brand-red)] text-glow-red" 
-          className="justify-center font-bold tracking-wider"
-          mode="decrypt"
-        />
+      {/* Main Container: Shifted lower into bottom screens to avoid horizontal bezel cut */}
+      <div className="flex flex-col items-center gap-8 z-10 px-4 text-center pt-28 md:pt-40">
+        {/* Reclassifying N entities text — wrapped into 2 lines so it does not cross vertical screen seam */}
+        <div className="flex flex-col items-center gap-1.5 max-w-2xl text-center">
+          <SplitFlap 
+            text={visitorCopy.countdown.reclassifyLine1 || "RECLASSIFYING ALL ENTITIES"} 
+            fontSize="text-lg sm:text-2xl md:text-3xl lg:text-4xl" 
+            color="text-[var(--color-brand-red)] text-glow-red" 
+            className="justify-center font-bold tracking-wider"
+            mode="decrypt"
+          />
+          <SplitFlap 
+            text={visitorCopy.countdown.reclassifyLine2 || "AS VIPs…"} 
+            fontSize="text-lg sm:text-2xl md:text-3xl lg:text-4xl" 
+            color="text-[var(--color-brand-red)] text-glow-red" 
+            className="justify-center font-bold tracking-wider"
+            mode="decrypt"
+          />
+        </div>
 
+        {/* Large Countdown Digit: Sits safely in bottom screen area, uncut by horizontal seam */}
         {countdown !== null && countdown > 0 && (
           <motion.div
             key={countdown}
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="mt-6"
+            className="mt-4"
           >
             <SplitFlap 
               text={countdown.toString()} 
-              fontSize="text-8xl md:text-[12rem] font-black" 
+              fontSize="text-7xl sm:text-9xl md:text-[11rem] font-black" 
               color="text-[var(--color-brand-red)] text-glow-red" 
               className="justify-center"
               flipSpeedMs={30}

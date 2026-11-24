@@ -56,8 +56,8 @@ export const VScene1 = ({ fastMode = true }: { fastMode?: boolean }) => {
       <HexDumpStream side="left" color="text-red-500/15" speed={60} lines={40} />
       <HexDumpStream side="right" color="text-red-500/15" speed={80} lines={40} />
 
-      {/* Network Pulse behind main text */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] opacity-20">
+      {/* Network Pulse behind main text — positioned slightly lower to align with alert */}
+      <div className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] opacity-20">
         <NetworkPulse color="#D63C2C" size={520} />
       </div>
 
@@ -71,35 +71,45 @@ export const VScene1 = ({ fastMode = true }: { fastMode?: boolean }) => {
         />
       </div>
 
-      {/* Main Centered Alert */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-8">
+      {/* Main Alert: Wrapped to 2 compact lines and shifted lower into bottom screens to avoid horizontal/vertical bezels */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pt-28 md:pt-40 px-4">
+        <div className="flex flex-col items-center gap-6 max-w-4xl text-center">
           <motion.div 
             animate={{ opacity: [1, 0.4, 1], scale: [1, 1.08, 1] }}
             transition={{ repeat: Infinity, duration: 0.9 }}
-            className="w-14 h-14 rounded-full bg-[var(--color-brand-red)] shadow-[0_0_50px_var(--color-brand-red)] flex items-center justify-center font-mono text-xs font-bold text-white tracking-widest"
+            className="w-14 h-14 rounded-full bg-[var(--color-brand-red)] shadow-[0_0_50px_var(--color-brand-red)] flex items-center justify-center font-mono text-xs font-bold text-white tracking-widest mb-1"
           >
             !
           </motion.div>
 
-          <SplitFlap 
-            text={visitorCopy.perimeterAlert.headline} 
-            color="text-[var(--color-brand-red)] text-glow-red" 
-            fontSize="text-3xl md:text-5xl lg:text-7xl font-black" 
-            className="justify-center text-center"
-            mode="decrypt"
-          />
+          {/* Two-line wrapped headline prevents text from crossing screen boundaries or getting cut */}
+          <div className="flex flex-col items-center gap-1.5">
+            <SplitFlap 
+              text={visitorCopy.perimeterAlert.headlineLine1 || "UNIDENTIFIED PRESENCE"} 
+              color="text-[var(--color-brand-red)] text-glow-red" 
+              fontSize="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black" 
+              className="justify-center text-center"
+              mode="decrypt"
+            />
+            <SplitFlap 
+              text={visitorCopy.perimeterAlert.headlineLine2 || "DETECTED"} 
+              color="text-[var(--color-brand-red)] text-glow-red" 
+              fontSize="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black" 
+              className="justify-center text-center"
+              mode="decrypt"
+            />
+          </div>
 
           {showSubText && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-2"
+              className="mt-2 max-w-xl text-center"
             >
               <SplitFlap 
                 text={visitorCopy.perimeterAlert.subtext} 
                 color="text-white/70 text-glow-white" 
-                fontSize="text-base md:text-xl font-mono" 
+                fontSize="text-sm sm:text-base md:text-lg font-mono" 
                 className="justify-center"
                 mode="decrypt"
               />

@@ -114,10 +114,11 @@ export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
       </div>
 
       {/* Main Grid: Left side staged reveal lines, Right side scan bars & threat meter */}
-      <div className="z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* 2-column layout (50/50) with safe gutter around center vertical bezel; padded lower to clear horizontal bezel */}
+      <div className="z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start pt-20 md:pt-32 px-4 md:px-8">
         
-        {/* Left Column: Friendly Turn staged reveal (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col gap-4 text-left">
+        {/* Left Column: Friendly Turn staged reveal (Screen 1 & 3, stays strictly <= 48% width) */}
+        <div className="flex flex-col gap-3.5 text-left max-w-xl">
           
           <div className="flex items-center gap-2 mb-2">
             <span className="font-mono text-xs text-gray-500 uppercase tracking-widest">
@@ -129,24 +130,24 @@ export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
           </div>
 
           {step >= 1 && (
-            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="max-w-lg">
               <SplitFlap 
                 text={visitorCopy.identityScan.revealedLines[0]} 
-                fontSize="text-base md:text-xl" 
+                fontSize="text-sm sm:text-base md:text-lg lg:text-xl" 
                 color="text-white/80 text-glow-white" 
-                className="justify-start font-mono"
+                className="justify-start font-mono break-words"
                 mode="decrypt"
               />
             </motion.div>
           )}
 
           {step >= 2 && (
-            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="max-w-lg">
               <SplitFlap 
                 text={visitorCopy.identityScan.revealedLines[1]} 
-                fontSize="text-base md:text-xl" 
+                fontSize="text-sm sm:text-base md:text-lg lg:text-xl" 
                 color="text-amber-400 text-glow-amber" 
-                className="justify-start font-mono"
+                className="justify-start font-mono break-words"
                 mode="decrypt"
               />
             </motion.div>
@@ -156,37 +157,37 @@ export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }}
-              className="my-1 p-3 bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r"
+              className="my-1 p-3 bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r max-w-lg"
             >
               <SplitFlap 
                 text={visitorCopy.identityScan.revealedLines[2]} 
-                fontSize="text-2xl md:text-4xl font-black" 
+                fontSize="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black" 
                 color="text-[var(--color-brand-green)] text-glow-green" 
-                className="justify-start font-mono"
+                className="justify-start font-mono break-words"
                 mode="decrypt"
               />
             </motion.div>
           )}
 
           {step >= 4 && (
-            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="max-w-lg">
               <SplitFlap 
                 text={visitorCopy.identityScan.revealedLines[3]} 
-                fontSize="text-base md:text-xl" 
+                fontSize="text-sm sm:text-base md:text-lg lg:text-xl" 
                 color="text-white/90 text-glow-white" 
-                className="justify-start font-mono"
+                className="justify-start font-mono break-words"
                 mode="decrypt"
               />
             </motion.div>
           )}
 
           {step >= 5 && (
-            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="max-w-lg">
               <SplitFlap 
                 text={visitorCopy.identityScan.revealedLines[4]} 
-                fontSize="text-base md:text-xl" 
+                fontSize="text-sm sm:text-base md:text-lg lg:text-xl" 
                 color="text-white/70 text-glow-white" 
-                className="justify-start font-mono"
+                className="justify-start font-mono break-words"
                 mode="decrypt"
               />
             </motion.div>
@@ -196,14 +197,14 @@ export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
             <motion.div 
               initial={{ opacity: 0, y: 10 }} 
               animate={{ opacity: 1, y: 0 }}
-              className="mt-3 inline-flex items-center gap-3 p-3 bg-emerald-600/20 border border-emerald-500/50 rounded-lg shadow-lg shadow-emerald-500/20"
+              className="mt-3 inline-flex items-center gap-3 p-3 bg-emerald-600/20 border border-emerald-500/50 rounded-lg shadow-lg shadow-emerald-500/20 max-w-lg"
             >
               <span className="text-xl">🤝</span>
               <SplitFlap 
                 text={visitorCopy.identityScan.revealedLines[5]} 
-                fontSize="text-xl md:text-2xl font-bold" 
+                fontSize="text-base sm:text-lg md:text-xl lg:text-2xl font-bold" 
                 color="text-[var(--color-brand-green)] text-glow-green" 
-                className="justify-start font-mono"
+                className="justify-start font-mono break-words"
                 mode="decrypt"
               />
             </motion.div>
@@ -211,8 +212,8 @@ export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
 
         </div>
 
-        {/* Right Column: Scan Bars (NO MATCH) + Draining Threat Meter (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-5 bg-black/40 p-6 rounded-lg border border-gray-800/80 backdrop-blur-sm">
+        {/* Right Column: Scan Bars (NO MATCH) + Draining Threat Meter (Screen 2 & 4, stays strictly >= 52% width) */}
+        <div className="flex flex-col gap-5 bg-black/40 p-6 rounded-lg border border-gray-800/80 backdrop-blur-sm max-w-lg">
           
           <div className="text-[10px] text-gray-500 uppercase font-mono tracking-widest border-b border-gray-800 pb-2">
             DIAGNOSTIC FILTER RESULTS

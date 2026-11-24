@@ -212,10 +212,11 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
       </div>
 
       {/* Main Grid: Left side metrics & tier copy, Right side Radar with blips */}
-      <div className="z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      {/* 2-column layout (50/50) with safe gutter around center vertical bezel; padded lower to clear horizontal bezel */}
+      <div className="z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center pt-16 md:pt-24 px-4 md:px-8">
         
-        {/* Left Column: Headcount & Threat Evaluation (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col gap-4 text-left">
+        {/* Left Column: Headcount & Threat Evaluation (Screen 1 & 3, stays strictly <= 48% width) */}
+        <div className="flex flex-col gap-4 text-left max-w-xl">
           
           <div className="flex items-center gap-3 flex-wrap">
             <span className="px-3 py-1 bg-red-600/20 border border-red-500/40 text-red-400 font-mono text-xs uppercase tracking-widest rounded-sm animate-pulse">
@@ -226,8 +227,8 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
             </span>
           </div>
 
-          {/* Self-Running Stage Indicator Banner */}
-          <div className={`flex items-center justify-between gap-3 px-4 py-2 rounded border font-mono text-xs md:text-sm tracking-wide transition-colors duration-500 ${
+          {/* Self-Running Stage Indicator Banner: Wrapped to prevent cutting across vertical bezel */}
+          <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded border font-mono text-xs md:text-sm tracking-wide transition-colors duration-500 max-w-xl flex-wrap ${
             currentStage.id === "E"
               ? "bg-red-950/60 border-red-500 text-red-300 shadow-[0_0_25px_rgba(239,68,68,0.35)]"
               : currentStage.id === "D"
@@ -236,11 +237,11 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
               ? "bg-orange-950/40 border-orange-500/60 text-orange-300"
               : "bg-emerald-950/30 border-emerald-500/50 text-emerald-300"
           }`}>
-            <div className="flex items-center gap-2.5">
-              <span className={`text-base ${currentStage.id === "E" ? "text-red-400 animate-bounce" : "text-amber-400"}`}>
+            <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
+              <span className={`text-base flex-shrink-0 ${currentStage.id === "E" ? "text-red-400 animate-bounce" : "text-amber-400"}`}>
                 ⚠
               </span>
-              <span className="font-bold tracking-wider uppercase">
+              <span className="font-bold tracking-wider uppercase leading-snug break-words">
                 {currentStage.id === "A" && "PERIMETER LOCK: INITIAL CONTACT"}
                 {currentStage.id === "B" && "GUEST COUNT ESCALATING: ADDITIONAL SIGNAL DETECTED"}
                 {currentStage.id === "C" && "ESCALATING THREAT ASSESSMENT: MULTIPLE GUESTS (>2)"}
@@ -248,7 +249,7 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
                 {currentStage.id === "E" && "MAXIMUM ALERT: GROUP-SIZE INCURSION CONFIRMED"}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-300">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-300 flex-shrink-0">
               <span className={`w-2 h-2 rounded-full ${currentStage.id === "E" ? "bg-red-500 animate-ping" : "bg-amber-500 animate-pulse"}`} />
               <span>{currentStage.id === "E" ? "CRITICAL" : "LIVE SCAN"}</span>
             </div>
@@ -261,16 +262,16 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
                 text={counterDisplay} 
                 fontSize="text-6xl md:text-8xl lg:text-9xl font-black" 
                 color="text-white text-glow-white" 
-                className="justify-start"
+                className="justify-start flex-shrink-0"
                 mode="flap"
                 flipSpeedMs={35}
               />
-              <div className="flex flex-col">
+              <div className="flex flex-col max-w-md">
                 <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">
                   {currentStage.headcountLabel}
                 </span>
                 <span 
-                  className="font-mono text-2xl md:text-3xl font-bold tracking-tight transition-colors duration-400"
+                  className="font-mono text-xl md:text-2xl lg:text-3xl font-bold tracking-tight transition-colors duration-400 break-words leading-tight"
                   style={{ color: currentStage.meterColor }}
                 >
                   {currentStage.headline}
@@ -278,12 +279,12 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
               </div>
             </div>
 
-            {/* Tactical Appraisal Box */}
+            {/* Tactical Appraisal Box: Wrapped cleanly to prevent boundary overflow */}
             <motion.div 
               key={currentStage.id}
               initial={{ opacity: 0, x: -6 }}
               animate={{ opacity: 1, x: 0 }}
-              className="p-4 rounded-lg border bg-black/40 backdrop-blur-sm transition-colors duration-500"
+              className="p-4 rounded-lg border bg-black/40 backdrop-blur-sm transition-colors duration-500 max-w-xl"
               style={{ borderColor: `${currentStage.meterColor}70` }}
             >
               <div className="flex items-center justify-between font-mono text-xs text-gray-400 uppercase tracking-widest mb-1">
@@ -296,7 +297,7 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
                 </span>
               </div>
               <div 
-                className="font-mono text-lg md:text-2xl font-black tracking-wide transition-colors duration-300"
+                className="font-mono text-base md:text-xl lg:text-2xl font-black tracking-wide transition-colors duration-300 break-words leading-snug"
                 style={{ color: currentStage.meterColor }}
               >
                 {currentStage.appraisal}
@@ -305,7 +306,7 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
           </div>
 
           {/* Threat Meter Bar */}
-          <div className="flex flex-col gap-2 mt-1">
+          <div className="flex flex-col gap-2 mt-1 max-w-xl">
             <div className="flex justify-between items-center font-mono text-xs">
               <span className="text-gray-400 tracking-wider">THREAT LEVEL METER:</span>
               <span 
@@ -351,8 +352,8 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
 
         </div>
 
-        {/* Right Column: Radar Scan with blips (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+        {/* Right Column: Radar Scan with blips (Screen 2 & 4, stays strictly >= 52% width) */}
+        <div className="flex flex-col items-center justify-center relative">
           <div className="relative w-[300px] h-[300px] md:w-[360px] md:h-[360px] flex items-center justify-center">
             
             {/* Base Radar Pulse */}

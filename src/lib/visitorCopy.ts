@@ -98,7 +98,11 @@ export const visitorCopy = {
   // Scene 1: Perimeter Alert
   perimeterAlert: {
     headline: "UNIDENTIFIED PRESENCE DETECTED",
+    headlineLine1: "UNIDENTIFIED PRESENCE",
+    headlineLine2: "DETECTED",
     subtext: "PERIMETER SENSOR LOCK ACTIVE",
+    subtextLine1: "PERIMETER SENSOR",
+    subtextLine2: "LOCK ACTIVE",
     terminalLogs: [
       "motion sensor 04 .... TRIGGERED",
       "badge reader .... NO CREDENTIAL",
@@ -142,6 +146,8 @@ export const visitorCopy = {
   // Scene 3b: Countdown
   countdown: {
     reclassifyHeader: "RECLASSIFYING ALL ENTITIES AS VIPs…",
+    reclassifyLine1: "RECLASSIFYING ALL ENTITIES",
+    reclassifyLine2: "AS VIPs…",
   },
 
   // Scene 4: Reveal & Subtext (Grand Climax)
