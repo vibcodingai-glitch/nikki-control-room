@@ -402,17 +402,32 @@ export const LiveDashboard = ({
         Pipeline · Net flow · Dwell · Oldest held
       </div>
 
-      {/* Main Board */}
+      {/* Main Board: Clean 50/50 Screen Split (Cols 0-1 on Left Screen, Cols 2-4 on Right Screen) with a dedicated center bezel gap */}
       <div className="flex-1 p-4 overflow-hidden flex flex-col relative z-0">
-        <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
-          {INITIAL_DATA.map((col, idx) => (
-            <PipelineColumn 
-              key={idx} 
-              col={col} 
-              idx={idx} 
-              visibleEnteringIdx={visibleEnteringIdx} 
-            />
-          ))}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14 overflow-x-auto pb-4">
+          {/* Left Screen Group (Screen 1 & 3: CREATED, TENDERING) */}
+          <div className="flex gap-4 flex-1">
+            {INITIAL_DATA.slice(0, 2).map((col, idx) => (
+              <PipelineColumn 
+                key={idx} 
+                col={col} 
+                idx={idx} 
+                visibleEnteringIdx={visibleEnteringIdx} 
+              />
+            ))}
+          </div>
+
+          {/* Right Screen Group (Screen 2 & 4: LOADING, IN TRANSIT, AT CUSTOMER) */}
+          <div className="flex gap-4 flex-1">
+            {INITIAL_DATA.slice(2, 5).map((col, idx) => (
+              <PipelineColumn 
+                key={idx + 2} 
+                col={col} 
+                idx={idx + 2} 
+                visibleEnteringIdx={visibleEnteringIdx} 
+              />
+            ))}
+          </div>
         </div>
       </div>
 
