@@ -157,7 +157,7 @@ export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }}
-              className="my-1 p-3 bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r max-w-lg"
+              className="mt-6 md:mt-10 mb-2 p-3 bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r max-w-lg"
             >
               <SplitFlap 
                 text={visitorCopy.identityScan.revealedLines[2]} 

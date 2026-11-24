@@ -279,12 +279,12 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
               </div>
             </div>
 
-            {/* Tactical Appraisal Box: Wrapped cleanly to prevent boundary overflow */}
+            {/* Tactical Appraisal Box: Wrapped cleanly to prevent boundary overflow; mt-6 ensures clean buffer over horizontal bezel */}
             <motion.div 
               key={currentStage.id}
               initial={{ opacity: 0, x: -6 }}
               animate={{ opacity: 1, x: 0 }}
-              className="p-4 rounded-lg border bg-black/40 backdrop-blur-sm transition-colors duration-500 max-w-xl"
+              className="mt-6 md:mt-8 p-4 rounded-lg border bg-black/40 backdrop-blur-sm transition-colors duration-500 max-w-xl"
               style={{ borderColor: `${currentStage.meterColor}70` }}
             >
               <div className="flex items-center justify-between font-mono text-xs text-gray-400 uppercase tracking-widest mb-1">

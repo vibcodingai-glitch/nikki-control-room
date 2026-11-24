@@ -56,8 +56,8 @@ export const VScene1 = ({ fastMode = true }: { fastMode?: boolean }) => {
       <HexDumpStream side="left" color="text-red-500/15" speed={60} lines={40} />
       <HexDumpStream side="right" color="text-red-500/15" speed={80} lines={40} />
 
-      {/* Network Pulse behind main text — positioned slightly lower to align with alert */}
-      <div className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] opacity-20">
+      {/* Network Pulse behind main text — positioned in bottom screen to align with alert */}
+      <div className="absolute top-[72%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] opacity-20">
         <NetworkPulse color="#D63C2C" size={520} />
       </div>
 
@@ -71,13 +71,13 @@ export const VScene1 = ({ fastMode = true }: { fastMode?: boolean }) => {
         />
       </div>
 
-      {/* Main Alert: Wrapped to 2 compact lines and shifted lower into bottom screens to avoid horizontal/vertical bezels */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pt-28 md:pt-40 px-4">
-        <div className="flex flex-col items-center gap-6 max-w-4xl text-center">
+      {/* Main Alert: Placed at top-[55%] to guarantee it sits 100% in the bottom screen below the horizontal bezel */}
+      <div className="absolute top-[55%] inset-x-0 bottom-[6%] z-10 flex flex-col items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-5 max-w-4xl text-center">
           <motion.div 
             animate={{ opacity: [1, 0.4, 1], scale: [1, 1.08, 1] }}
             transition={{ repeat: Infinity, duration: 0.9 }}
-            className="w-14 h-14 rounded-full bg-[var(--color-brand-red)] shadow-[0_0_50px_var(--color-brand-red)] flex items-center justify-center font-mono text-xs font-bold text-white tracking-widest mb-1"
+            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[var(--color-brand-red)] shadow-[0_0_50px_var(--color-brand-red)] flex items-center justify-center font-mono text-xs font-bold text-white tracking-widest mb-1"
           >
             !
           </motion.div>
@@ -104,7 +104,7 @@ export const VScene1 = ({ fastMode = true }: { fastMode?: boolean }) => {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-2 max-w-xl text-center"
+              className="mt-1 max-w-xl text-center"
             >
               <SplitFlap 
                 text={visitorCopy.perimeterAlert.subtext} 

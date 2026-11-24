@@ -75,13 +75,13 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance, fastMode = true 
       <HexDumpStream side="left" color="text-red-500/20" speed={40} lines={50} />
       <HexDumpStream side="right" color="text-red-500/20" speed={50} lines={50} />
 
-      {/* Pulsing network scanner — large, centered */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] opacity-15">
+      {/* Pulsing network scanner — positioned in bottom screen behind countdown */}
+      <div className="absolute top-[72%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] opacity-15">
         <NetworkPulse color="#D63C2C" size={600} />
       </div>
 
-      {/* Main Container: Shifted lower into bottom screens to avoid horizontal bezel cut */}
-      <div className="flex flex-col items-center gap-8 z-10 px-4 text-center pt-28 md:pt-40">
+      {/* Main Container: Positioned at top-[55%] to guarantee it sits 100% in the bottom screen below the horizontal bezel */}
+      <div className="absolute top-[55%] inset-x-0 bottom-[6%] z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
         {/* Reclassifying N entities text — wrapped into 2 lines so it does not cross vertical screen seam */}
         <div className="flex flex-col items-center gap-1.5 max-w-2xl text-center">
           <SplitFlap 
