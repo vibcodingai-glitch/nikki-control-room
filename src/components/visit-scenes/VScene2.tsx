@@ -201,8 +201,8 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
       {/* Hex dumps on right edge */}
       <HexDumpStream side="right" color="text-red-500/10" speed={100} lines={50} />
 
-      {/* Typing telemetry — bottom left */}
-      <div className="absolute bottom-10 left-8 z-20 w-[380px] pointer-events-none">
+      {/* Typing telemetry — top right screen (clear of threat meter and radar) */}
+      <div className="absolute top-14 right-8 z-20 w-[380px] pointer-events-none">
         <TypingLog 
           messages={telemetryLines} 
           color="text-red-400/50" 
@@ -211,53 +211,53 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
         />
       </div>
 
-      {/* Main Grid: Left side metrics & tier copy, Right side Radar with blips */}
-      {/* 2-column layout (50/50) with safe gutter around center vertical bezel; padded lower to clear horizontal bezel */}
-      <div className="z-10 w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center pt-16 md:pt-24 px-4 md:px-8">
+      {/* Main 2x2 Bezel-Safe Grid: Left Half (Screens 1 & 3) | Right Half (Screens 2 & 4) */}
+      <div className="absolute inset-0 z-10 w-full h-full grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 px-8 md:px-14">
         
-        {/* Left Column: Headcount & Threat Evaluation (Screen 1 & 3, stays strictly <= 48% width) */}
-        <div className="flex flex-col gap-4 text-left max-w-xl">
+        {/* Left Half: Explicitly split into Top-Left (50%) and Bottom-Left (50%) so horizontal bezel passes through empty gap */}
+        <div className="flex flex-col h-full max-w-xl text-left">
           
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="px-3 py-1 bg-red-600/20 border border-red-500/40 text-red-400 font-mono text-xs uppercase tracking-widest rounded-sm animate-pulse">
-              {visitorCopy.headcount.liveBadge}
-            </span>
-            <span className="font-mono text-xs text-gray-500 tracking-wider">
-              {visitorCopy.headcount.incursionVector}
-            </span>
-          </div>
-
-          {/* Self-Running Stage Indicator Banner: Wrapped to prevent cutting across vertical bezel */}
-          <div className={`flex items-center justify-between gap-3 px-4 py-2.5 rounded border font-mono text-xs md:text-sm tracking-wide transition-colors duration-500 max-w-xl flex-wrap ${
-            currentStage.id === "E"
-              ? "bg-red-950/60 border-red-500 text-red-300 shadow-[0_0_25px_rgba(239,68,68,0.35)]"
-              : currentStage.id === "D"
-              ? "bg-amber-950/50 border-amber-500 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse"
-              : currentStage.id === "C"
-              ? "bg-orange-950/40 border-orange-500/60 text-orange-300"
-              : "bg-emerald-950/30 border-emerald-500/50 text-emerald-300"
-          }`}>
-            <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
-              <span className={`text-base flex-shrink-0 ${currentStage.id === "E" ? "text-red-400 animate-bounce" : "text-amber-400"}`}>
-                ⚠
+          {/* Top-Left Screen (0% to 50% Y): Live Badge, Stage Banner, Giant Counter */}
+          <div className="h-1/2 flex flex-col justify-end pb-6 gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="px-3 py-1 bg-red-600/20 border border-red-500/40 text-red-400 font-mono text-xs uppercase tracking-widest rounded-sm animate-pulse">
+                {visitorCopy.headcount.liveBadge}
               </span>
-              <span className="font-bold tracking-wider uppercase leading-snug break-words">
-                {currentStage.id === "A" && "PERIMETER LOCK: INITIAL CONTACT"}
-                {currentStage.id === "B" && "GUEST COUNT ESCALATING: ADDITIONAL SIGNAL DETECTED"}
-                {currentStage.id === "C" && "ESCALATING THREAT ASSESSMENT: MULTIPLE GUESTS (>2)"}
-                {currentStage.id === "D" && "RAPID INGRESS DETECTED: COUNT UNRELIABLE"}
-                {currentStage.id === "E" && "MAXIMUM ALERT: GROUP-SIZE INCURSION CONFIRMED"}
+              <span className="font-mono text-xs text-gray-500 tracking-wider">
+                {visitorCopy.headcount.incursionVector}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-300 flex-shrink-0">
-              <span className={`w-2 h-2 rounded-full ${currentStage.id === "E" ? "bg-red-500 animate-ping" : "bg-amber-500 animate-pulse"}`} />
-              <span>{currentStage.id === "E" ? "CRITICAL" : "LIVE SCAN"}</span>
-            </div>
-          </div>
 
-          {/* Big Number Tick & Subline */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-baseline gap-4 flex-wrap">
+            {/* Self-Running Stage Indicator Banner: Wrapped to prevent cutting across vertical bezel */}
+            <div className={`flex items-center justify-between gap-3 px-4 py-2 rounded border font-mono text-xs md:text-sm tracking-wide transition-colors duration-500 max-w-xl flex-wrap ${
+              currentStage.id === "E"
+                ? "bg-red-950/60 border-red-500 text-red-300 shadow-[0_0_25px_rgba(239,68,68,0.35)]"
+                : currentStage.id === "D"
+                ? "bg-amber-950/50 border-amber-500 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.3)] animate-pulse"
+                : currentStage.id === "C"
+                ? "bg-orange-950/40 border-orange-500/60 text-orange-300"
+                : "bg-emerald-950/30 border-emerald-500/50 text-emerald-300"
+            }`}>
+              <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
+                <span className={`text-base flex-shrink-0 ${currentStage.id === "E" ? "text-red-400 animate-bounce" : "text-amber-400"}`}>
+                  ⚠
+                </span>
+                <span className="font-bold tracking-wider uppercase leading-snug break-words">
+                  {currentStage.id === "A" && "PERIMETER LOCK: INITIAL CONTACT"}
+                  {currentStage.id === "B" && "GUEST COUNT ESCALATING: ADDITIONAL SIGNAL DETECTED"}
+                  {currentStage.id === "C" && "ESCALATING THREAT ASSESSMENT: MULTIPLE GUESTS (>2)"}
+                  {currentStage.id === "D" && "RAPID INGRESS DETECTED: COUNT UNRELIABLE"}
+                  {currentStage.id === "E" && "MAXIMUM ALERT: GROUP-SIZE INCURSION CONFIRMED"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-300 flex-shrink-0">
+                <span className={`w-2 h-2 rounded-full ${currentStage.id === "E" ? "bg-red-500 animate-ping" : "bg-amber-500 animate-pulse"}`} />
+                <span>{currentStage.id === "E" ? "CRITICAL" : "LIVE SCAN"}</span>
+              </div>
+            </div>
+
+            {/* Giant Counter Digit */}
+            <div className="pt-1">
               <SplitFlap 
                 text={counterDisplay} 
                 fontSize="text-6xl md:text-8xl lg:text-9xl font-black" 
@@ -266,25 +266,29 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
                 mode="flap"
                 flipSpeedMs={35}
               />
-              <div className="flex flex-col max-w-md">
-                <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">
-                  {currentStage.headcountLabel}
-                </span>
-                <span 
-                  className="font-mono text-xl md:text-2xl lg:text-3xl font-bold tracking-tight transition-colors duration-400 break-words leading-tight"
-                  style={{ color: currentStage.meterColor }}
-                >
-                  {currentStage.headline}
-                </span>
-              </div>
+            </div>
+          </div>
+
+          {/* Bottom-Left Screen (50% to 100% Y): Headline, Tactical Appraisal, Threat Meter (safely above bottom ticker) */}
+          <div className="h-1/2 flex flex-col justify-start pt-6 pb-14 gap-3.5">
+            <div className="flex flex-col max-w-md">
+              <span className="font-mono text-xs text-gray-400 uppercase tracking-widest">
+                {currentStage.headcountLabel}
+              </span>
+              <span 
+                className="font-mono text-xl md:text-2xl lg:text-3xl font-bold tracking-tight transition-colors duration-400 break-words leading-tight"
+                style={{ color: currentStage.meterColor }}
+              >
+                {currentStage.headline}
+              </span>
             </div>
 
-            {/* Tactical Appraisal Box: Wrapped cleanly to prevent boundary overflow; mt-6 ensures clean buffer over horizontal bezel */}
+            {/* Tactical Appraisal Box */}
             <motion.div 
               key={currentStage.id}
               initial={{ opacity: 0, x: -6 }}
               animate={{ opacity: 1, x: 0 }}
-              className="mt-6 md:mt-8 p-4 rounded-lg border bg-black/40 backdrop-blur-sm transition-colors duration-500 max-w-xl"
+              className="p-3.5 rounded-lg border bg-black/40 backdrop-blur-sm transition-colors duration-500 max-w-xl"
               style={{ borderColor: `${currentStage.meterColor}70` }}
             >
               <div className="flex items-center justify-between font-mono text-xs text-gray-400 uppercase tracking-widest mb-1">
@@ -303,61 +307,63 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
                 {currentStage.appraisal}
               </div>
             </motion.div>
-          </div>
 
-          {/* Threat Meter Bar */}
-          <div className="flex flex-col gap-2 mt-1 max-w-xl">
-            <div className="flex justify-between items-center font-mono text-xs">
-              <span className="text-gray-400 tracking-wider">THREAT LEVEL METER:</span>
-              <span 
-                className="font-bold tracking-widest transition-colors duration-300"
-                style={{ color: currentStage.meterColor }}
-              >
-                {currentStage.id === "A" && "LOW (20%)"}
-                {currentStage.id === "B" && "MODERATE (40%)"}
-                {currentStage.id === "C" && "ELEVATED (65%)"}
-                {currentStage.id === "D" && "HIGH — PULSING (85%)"}
-                {currentStage.id === "E" && "CRITICAL (100%)"}
-              </span>
-            </div>
+            {/* Threat Meter Bar */}
+            <div className="flex flex-col gap-1.5 max-w-xl">
+              <div className="flex justify-between items-center font-mono text-xs">
+                <span className="text-gray-400 tracking-wider">THREAT LEVEL METER:</span>
+                <span 
+                  className="font-bold tracking-widest transition-colors duration-300"
+                  style={{ color: currentStage.meterColor }}
+                >
+                  {currentStage.id === "A" && "LOW (20%)"}
+                  {currentStage.id === "B" && "MODERATE (40%)"}
+                  {currentStage.id === "C" && "ELEVATED (65%)"}
+                  {currentStage.id === "D" && "HIGH — PULSING (85%)"}
+                  {currentStage.id === "E" && "CRITICAL (100%)"}
+                </span>
+              </div>
 
-            {/* Gauge Bar */}
-            <div className="w-full h-4 bg-gray-900 border border-gray-700/60 rounded-sm overflow-hidden p-[2px] relative shadow-inner">
-              {/* Background gradient zones */}
-              <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-600" />
-              
-              <motion.div 
-                className="h-full rounded-sm relative transition-colors duration-400"
-                style={{ backgroundColor: currentStage.meterColor }}
-                animate={{ 
-                  width: `${currentStage.meterPercent}%`,
-                  opacity: currentStage.id === "D" ? [0.75, 1, 0.75] : 1
-                }}
-                transition={{ 
-                  width: { duration: 0.35, ease: "easeOut" },
-                  opacity: { repeat: Infinity, duration: 0.5 }
-                }}
-              >
-                <div className="absolute inset-0 bg-white/20 animate-pulse" />
-              </motion.div>
-            </div>
+              {/* Gauge Bar */}
+              <div className="w-full h-3.5 bg-gray-900 border border-gray-700/60 rounded-sm overflow-hidden p-[2px] relative shadow-inner">
+                {/* Background gradient zones */}
+                <div className="absolute inset-0 opacity-20 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-600" />
+                
+                <motion.div 
+                  className="h-full rounded-sm relative transition-colors duration-400"
+                  style={{ backgroundColor: currentStage.meterColor }}
+                  animate={{ 
+                    width: `${currentStage.meterPercent}%`,
+                    opacity: currentStage.id === "D" ? [0.75, 1, 0.75] : 1
+                  }}
+                  transition={{ 
+                    width: { duration: 0.35, ease: "easeOut" },
+                    opacity: { repeat: Infinity, duration: 0.5 }
+                  }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                </motion.div>
+              </div>
 
-            <div className="flex justify-between font-mono text-[9px] text-gray-600 px-1">
-              <span>0% LOW</span>
-              <span>50% MODERATE</span>
-              <span>75% ELEVATED</span>
-              <span>100% CRITICAL</span>
+              <div className="flex justify-between font-mono text-[9px] text-gray-600 px-1">
+                <span>0% LOW</span>
+                <span>50% MODERATE</span>
+                <span>75% ELEVATED</span>
+                <span>100% CRITICAL</span>
+              </div>
             </div>
           </div>
 
         </div>
 
-        {/* Right Column: Radar Scan with blips (Screen 2 & 4, stays strictly >= 52% width) */}
-        <div className="flex flex-col items-center justify-center relative">
-          <div className="relative w-[300px] h-[300px] md:w-[360px] md:h-[360px] flex items-center justify-center">
-            
-            {/* Base Radar Pulse */}
-            <NetworkPulse color={currentStage.meterColor} size={340} />
+        {/* Right Half: Radar Scan anchored 100% inside Bottom-Right screen (50% to 100% Y) so blips are never cut */}
+        <div className="flex flex-col h-full items-center">
+          <div className="hidden lg:block h-1/2" />
+          <div className="h-1/2 flex flex-col items-center justify-center relative pb-10">
+            <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px] flex items-center justify-center">
+              
+              {/* Base Radar Pulse */}
+              <NetworkPulse color={currentStage.meterColor} size={300} />
 
             {/* Blip entities plotted on radar */}
             <AnimatePresence>
@@ -394,6 +400,7 @@ export const VScene2 = ({ fastMode = true }: { fastMode?: boolean }) => {
             {/* Center target crosshair / blip count */}
             <div className="absolute font-mono text-[9px] text-gray-400 bottom-2 right-2 bg-black/60 px-2 py-0.5 rounded border border-white/10 font-bold">
               {currentStage.radarLabel || `RADAR BLIPS: ${visibleBlips.length}`}
+            </div>
             </div>
           </div>
         </div>

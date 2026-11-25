@@ -75,49 +75,60 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance, fastMode = true 
       <HexDumpStream side="left" color="text-red-500/20" speed={40} lines={50} />
       <HexDumpStream side="right" color="text-red-500/20" speed={50} lines={50} />
 
-      {/* Pulsing network scanner — positioned in bottom screen behind countdown */}
-      <div className="absolute top-[72%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] opacity-15">
-        <NetworkPulse color="#D63C2C" size={600} />
+      {/* Pulsing network scanner — centered inside Bottom-Right screen (75% X, 74% Y) behind the countdown digit */}
+      <div className="absolute top-[74%] left-[75%] -translate-x-1/2 -translate-y-1/2 z-[1] opacity-20 pointer-events-none">
+        <NetworkPulse color="#D63C2C" size={440} />
       </div>
 
-      {/* Main Container: Positioned at top-[55%] to guarantee it sits 100% in the bottom screen below the horizontal bezel */}
-      <div className="absolute top-[55%] inset-x-0 bottom-[6%] z-10 flex flex-col items-center justify-center gap-6 px-4 text-center">
-        {/* Reclassifying N entities text — wrapped into 2 lines so it does not cross vertical screen seam */}
-        <div className="flex flex-col items-center gap-1.5 max-w-2xl text-center">
+      {/* Main Container: Side-by-side 2-column split in Bottom Screens (top-[55%] to bottom-[8%]) */}
+      {/* Bottom-Left Screen: Reclassifying text | Bottom-Right Screen: Giant 3-2-1 Countdown */}
+      <div className="absolute top-[55%] inset-x-0 bottom-[8%] z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-center px-8 md:px-14">
+        
+        {/* Bottom-Left Screen: Stacked Reclassifying Message (stays strictly <= 46% width) */}
+        <div className="flex flex-col items-center justify-center gap-2 text-center">
           <SplitFlap 
-            text={visitorCopy.countdown.reclassifyLine1 || "RECLASSIFYING ALL ENTITIES"} 
-            fontSize="text-lg sm:text-2xl md:text-3xl lg:text-4xl" 
+            text="RECLASSIFYING" 
+            fontSize="text-2xl sm:text-3xl md:text-4xl lg:text-5xl" 
             color="text-[var(--color-brand-red)] text-glow-red" 
-            className="justify-center font-bold tracking-wider"
+            className="justify-center font-black tracking-wider"
+            mode="decrypt"
+          />
+          <SplitFlap 
+            text="ALL ENTITIES" 
+            fontSize="text-2xl sm:text-3xl md:text-4xl lg:text-5xl" 
+            color="text-[var(--color-brand-red)] text-glow-red" 
+            className="justify-center font-black tracking-wider"
             mode="decrypt"
           />
           <SplitFlap 
             text={visitorCopy.countdown.reclassifyLine2 || "AS VIPs…"} 
-            fontSize="text-lg sm:text-2xl md:text-3xl lg:text-4xl" 
-            color="text-[var(--color-brand-red)] text-glow-red" 
-            className="justify-center font-bold tracking-wider"
+            fontSize="text-2xl sm:text-3xl md:text-4xl lg:text-5xl" 
+            color="text-amber-400 text-glow-amber" 
+            className="justify-center font-black tracking-wider mt-1"
             mode="decrypt"
           />
         </div>
 
-        {/* Large Countdown Digit: Sits safely in bottom screen area, uncut by horizontal seam */}
-        {countdown !== null && countdown > 0 && (
-          <motion.div
-            key={countdown}
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mt-4"
-          >
-            <SplitFlap 
-              text={countdown.toString()} 
-              fontSize="text-7xl sm:text-9xl md:text-[11rem] font-black" 
-              color="text-[var(--color-brand-red)] text-glow-red" 
-              className="justify-center"
-              flipSpeedMs={30}
-              mode="decrypt"
-            />
-          </motion.div>
-        )}
+        {/* Bottom-Right Screen: Large Countdown Digit (stays strictly >= 54% width, 100% below horizontal bezel) */}
+        <div className="flex flex-col items-center justify-center text-center">
+          {countdown !== null && countdown > 0 && (
+            <motion.div
+              key={countdown}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+            >
+              <SplitFlap 
+                text={countdown.toString()} 
+                fontSize="text-8xl sm:text-9xl md:text-[12rem] font-black" 
+                color="text-[var(--color-brand-red)] text-glow-red" 
+                className="justify-center"
+                flipSpeedMs={30}
+                mode="decrypt"
+              />
+            </motion.div>
+          )}
+        </div>
+
       </div>
     </motion.div>
   );

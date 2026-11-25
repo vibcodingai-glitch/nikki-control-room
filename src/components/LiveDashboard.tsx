@@ -224,8 +224,8 @@ const PipelineColumn: React.FC<{
           </div>
         </div>
 
-        {/* Oldest Held */}
-        <div className="mb-4">
+        {/* Oldest Held — padded down slightly so the 50% horizontal bezel passes cleanly above it */}
+        <div className="mb-4 pt-6">
           <h3 className="text-gray-500 text-xs font-semibold mb-3 uppercase tracking-wider">OLDEST HELD</h3>
           <div className="flex flex-col gap-3">
             {col.oldest.map((item, i) => (
