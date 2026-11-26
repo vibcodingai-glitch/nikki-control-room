@@ -116,28 +116,28 @@ export default function VisitorDisplayPage() {
       const mode = params.get("mode");
       if (mode === "full" || mode === "standard" || mode === "38s" || mode === "40s" || mode === "slow") {
         updateState({ fastMode: false });
-      } else if (mode === "fast" || mode === "15s") {
+      } else if (mode === "fast" || mode === "19s" || mode === "15s") {
         updateState({ fastMode: true });
       }
     }
   }, [updateState]);
 
-  // Automatic Scene Progression (calibrated for 15s Fast Mode or 38s Full Cinematic Mode)
+  // Automatic Scene Progression (calibrated for 19s Fast Mode or 38s Full Cinematic Mode)
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
     if (sceneIndex === 1) {
-      // Perimeter alert: 1.8s (Fast) or 5.8s (Full 38s)
-      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), fastMode ? 1800 : 5800);
+      // Perimeter alert: 2.4s (Fast 19s) or 5.8s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 2 }), fastMode ? 2400 : 5800);
     } else if (sceneIndex === 2) {
-      // Self-running Escalation: 3.5s (Fast) or 11.5s (Full 38s)
-      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), fastMode ? 3500 : 11500);
+      // Self-running Escalation: 4.5s (Fast 19s) or 11.5s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 3 }), fastMode ? 4500 : 11500);
     } else if (sceneIndex === 3) {
-      // Identity scan: 3.0s (Fast) or 9.5s (Full 38s)
-      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), fastMode ? 3000 : 9500);
+      // Identity scan & VIP Status: 5.0s (Fast 19s — extra +2s reading time) or 9.5s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 4 }), fastMode ? 5000 : 9500);
     } else if (sceneIndex === 4) {
-      // Countdown: 2.0s (Fast) or 4.8s (Full 38s)
-      timeout = setTimeout(() => updateState({ sceneIndex: 5 }), fastMode ? 2000 : 4800);
+      // Countdown: 2.4s (Fast 19s) or 4.8s (Full 38s)
+      timeout = setTimeout(() => updateState({ sceneIndex: 5 }), fastMode ? 2400 : 4800);
     }
     // Scene 5 (VScene4) is the Grand Climax / Final Screen — holds indefinitely with zero distortion banner
 
@@ -173,7 +173,7 @@ export default function VisitorDisplayPage() {
                   : "text-gray-400 hover:text-white"
               }`}
             >
-              <span>⚡</span> 15s Fast
+              <span>⚡</span> 19s Fast
             </button>
             <button
               onClick={() => updateState({ fastMode: false })}

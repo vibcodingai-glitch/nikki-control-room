@@ -208,7 +208,7 @@ export default function VisitAdminPage() {
                       : "text-gray-400 hover:text-white border border-transparent"
                   }`}
                 >
-                  <Zap size={15} /> 15s Fast Mode
+                  <Zap size={15} /> 19s Fast Mode
                 </button>
                 <button
                   type="button"
@@ -228,13 +228,13 @@ export default function VisitAdminPage() {
                 <span className={`text-xs px-2 py-0.5 rounded font-mono font-bold uppercase ${
                   fastMode ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
                 }`}>
-                  {fastMode ? "15s Mode" : "38s Mode"}
+                  {fastMode ? "19s Mode" : "38s Mode"}
                 </span>
               </div>
 
               <p className="text-xs text-gray-400 mt-1.5 leading-relaxed font-mono">
                 {fastMode 
-                  ? "⚡ Rapid executive pacing (~15s total): quick perimeter alert (1.8s), accelerated headcount escalation (3.5s), instant identity match (3s), and rapid 3-2-1 countdown into the grand reveal."
+                  ? "⚡ Crisp executive pacing (~19s total): clear perimeter alert (2.4s), smooth headcount escalation (4.5s), readable VIP identity reveal (5.0s), and 3-2-1 countdown (2.4s) into the grand reveal."
                   : "🎬 Full dramatic buildup (~38s total): deep tension escalation across Stages A-E (12s), thorough multi-factor facial and badge scanning (10s), and deliberate countdown into the grand reveal."}
               </p>
             </div>
@@ -243,7 +243,7 @@ export default function VisitAdminPage() {
               <button
                 onClick={() => {
                   handleSceneChange(1);
-                  setLaunchFeedback(`✅ LAUNCHED! ${fastMode ? "15s Fast" : "38s Full Cinematic"} sequence triggered`);
+                  setLaunchFeedback(`✅ LAUNCHED! ${fastMode ? "19s Fast" : "38s Full Cinematic"} sequence triggered`);
                   setTimeout(() => setLaunchFeedback(null), 3500);
                 }}
                 className={`w-full py-4 text-white font-black text-lg uppercase tracking-widest rounded-lg shadow-lg transition flex items-center justify-center gap-3 cursor-pointer ${
@@ -253,7 +253,7 @@ export default function VisitAdminPage() {
                 }`}
               >
                 <AlertTriangle size={22} />
-                {fastMode ? "LAUNCH 15s FAST SEQUENCE NOW" : "LAUNCH 38s CINEMATIC SEQUENCE NOW"}
+                {fastMode ? "LAUNCH 19s FAST SEQUENCE NOW" : "LAUNCH 38s CINEMATIC SEQUENCE NOW"}
               </button>
 
               {/* QUICK DIRECT LAUNCH CHIPS */}
@@ -264,12 +264,12 @@ export default function VisitAdminPage() {
                     type="button"
                     onClick={() => {
                       updateState({ fastMode: true, sceneIndex: 1 });
-                      setLaunchFeedback("✅ LAUNCHED! 15s Fast Mode triggered");
+                      setLaunchFeedback("✅ LAUNCHED! 19s Fast Mode triggered");
                       setTimeout(() => setLaunchFeedback(null), 3500);
                     }}
                     className="px-2.5 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 transition flex items-center gap-1 cursor-pointer"
                   >
-                    <Zap size={12} /> Launch 15s
+                    <Zap size={12} /> Launch 19s
                   </button>
                   <button
                     type="button"
@@ -306,7 +306,7 @@ export default function VisitAdminPage() {
                       ? "bg-amber-500/10 text-amber-400 border-amber-500/30" 
                       : "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
                   }`}>
-                    {fastMode ? "⚡ 15s MODE" : "🎬 38s MODE"}
+                    {fastMode ? "⚡ 19s MODE" : "🎬 38s MODE"}
                   </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">
                     {sceneIndex === 0 ? "STANDBY" : `IN PROGRESS (SCENE ${sceneIndex})`}

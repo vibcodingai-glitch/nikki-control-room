@@ -22,7 +22,7 @@ export const VScene1 = ({ fastMode = true }: { fastMode?: boolean }) => {
 
       const textTimer = setTimeout(() => {
         setShowSubText(true);
-      }, fastMode ? 1400 : 2500);
+      }, fastMode ? 1000 : 2500);
 
       return () => {
         clearTimeout(voiceTimer);

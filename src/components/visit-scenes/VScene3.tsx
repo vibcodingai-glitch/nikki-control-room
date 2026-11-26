@@ -55,9 +55,9 @@ export const VScene3 = ({ fastMode = true }: { fastMode?: boolean }) => {
       }
     }, 30);
 
-    // 2. Staged reveal of the Friendly Turn (2.8s in Fast, 9.2s in Standard 38s)
+    // 2. Staged reveal of the Friendly Turn (finishes at 3.15s in 5s Fast Mode for +1.85s reading hold; 9.2s in 38s Standard)
     const timings = fastMode
-      ? [1100, 1450, 1800, 2150, 2500, 2800]
+      ? [900, 1300, 1750, 2250, 2700, 3150]
       : [3200, 4400, 5600, 6800, 8000, 9200];
 
     const timers = timings.map((time, index) =>

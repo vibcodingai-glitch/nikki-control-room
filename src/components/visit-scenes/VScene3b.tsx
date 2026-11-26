@@ -27,8 +27,8 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance, fastMode = true 
   setBeepGapRef.current = setBeepGap;
 
   useEffect(() => {
-    // Initial delay before countdown starts (0.4s in Fast, 1.6s in Standard)
-    const initialDelay = fastMode ? 400 : 1600;
+    // Initial delay before countdown starts (0.5s in Fast 19s, 1.6s in Standard)
+    const initialDelay = fastMode ? 500 : 1600;
     const t1 = setTimeout(() => {
       setCountdown(3);
     }, initialDelay);
@@ -41,14 +41,14 @@ export const VScene3b: React.FC<SceneProps> = ({ onAutoAdvance, fastMode = true 
 
     if (countdown > 0) {
       // Increase tempo of alert-beep as countdown drops
-      if (countdown === 3) setBeepGapRef.current(fastMode ? 450 : 800);
-      if (countdown === 2) setBeepGapRef.current(fastMode ? 300 : 500);
+      if (countdown === 3) setBeepGapRef.current(fastMode ? 500 : 800);
+      if (countdown === 2) setBeepGapRef.current(fastMode ? 350 : 500);
       if (countdown === 1) {
-        setBeepGapRef.current(fastMode ? 200 : 300);
+        setBeepGapRef.current(fastMode ? 220 : 300);
         playRef.current("whoosh-transition");
       }
 
-      const stepInterval = fastMode ? 450 : 950;
+      const stepInterval = fastMode ? 550 : 950;
       const timer = setTimeout(() => {
         setCountdown((c) => (c !== null ? c - 1 : null));
       }, stepInterval);
